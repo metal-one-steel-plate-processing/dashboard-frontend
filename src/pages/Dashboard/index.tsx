@@ -1,5 +1,6 @@
 /* eslint-disable no-octal */
 import React, { useEffect, useState } from 'react';
+
 import AppBar from '@material-ui/core/AppBar';
 import Grid from '@material-ui/core/Grid';
 import Fab from '@material-ui/core/Fab';
@@ -11,7 +12,13 @@ import Drawer from '@material-ui/core/Drawer';
 import Link from '@material-ui/core/Link';
 import Button from '@material-ui/core/Button';
 import TextField from '@material-ui/core/TextField';
-import format from 'date-fns/format';
+import Table from '@material-ui/core/Table';
+import TableBody from '@material-ui/core/TableBody';
+import TableCell from '@material-ui/core/TableCell';
+import TableContainer from '@material-ui/core/TableContainer';
+import TableHead from '@material-ui/core/TableHead';
+import TableRow from '@material-ui/core/TableRow';
+import { parseISO, format } from 'date-fns';
 
 import SettingsIcon from '@material-ui/icons/Settings';
 
@@ -20,6 +27,7 @@ import Highcharts from 'highcharts';
 import HighchartsMore from 'highcharts/highcharts-more';
 
 import { Paper } from '@material-ui/core';
+
 import api from '../../services/api';
 
 HighchartsMore(Highcharts);
@@ -56,7 +64,7 @@ const useStyles = makeStyles(theme => ({
     width: 240,
   },
   fab: {
-    position: 'absolute',
+    position: 'fixed',
     bottom: theme.spacing(2),
     right: theme.spacing(2),
   },
@@ -66,13 +74,22 @@ const useStyles = makeStyles(theme => ({
   },
 }));
 
+interface DataMachineInterface {
+  id: string;
+  factory: string;
+  machine: string;
+  datatime: Date;
+  status: string;
+}
 const Dashboard: React.FC = () => {
   const classes = useStyles();
   const [OpenDrawer, setOpenDrawer] = useState(false);
   const [DateEfficiency, setDateEfficiency] = useState(
     format(new Date(), 'yyyy-MM-dd'),
   );
-  const [DataMachine, setDataMachine] = useState([]);
+  const [DataMachine, setDataMachine] = useState<DataMachineInterface[] | null>(
+    null,
+  );
 
   useEffect(() => {
     loadDataMachine();
@@ -82,9 +99,33 @@ const Dashboard: React.FC = () => {
   async function loadDataMachine() {
     const responseMachine = await api.post('/filter-date', {
       date: DateEfficiency,
+      machine: 'machine001',
+    });
+
+    const newDataMachine = responseMachine.data.map(
+      (dataMachine: DataMachineInterface) => {
+        return { ...dataMachine, machine: 'machine001' };
+      },
+    );
+
+    const responseMachine2 = await api.post('/filter-date', {
+      date: DateEfficiency,
       machine: 'machine002',
     });
-    return responseMachine && setDataMachine(responseMachine.data);
+
+    const newDataMachine2 = responseMachine2.data.map(
+      (dataMachine: DataMachineInterface) => {
+        return { ...dataMachine, machine: 'machine002' };
+      },
+    );
+
+    setDataMachine(
+      DataMachine
+        ? DataMachine.concat(newDataMachine.concat(newDataMachine2))
+        : newDataMachine2,
+    );
+
+    return true;
     // setDataMachine(responseMachine.data);
   }
 
@@ -97,6 +138,14 @@ const Dashboard: React.FC = () => {
     chart: {
       type: 'columnrange',
       inverted: true,
+    },
+    title: {
+      text: '',
+      // text: null // as an alternative
+    },
+    subtitle: {
+      text: '',
+      // text: null // as an alternative
     },
     yAxis: {
       type: 'datetime',
@@ -116,7 +165,7 @@ const Dashboard: React.FC = () => {
     series: [
       {
         name: 'Hours',
-        data: DataMachine,
+        data: [],
       },
     ],
   };
@@ -144,16 +193,100 @@ const Dashboard: React.FC = () => {
             </Typography>
             <Typography
               component="h1"
-              variant="h6"
+              variant="h4"
               align="center"
               color="textSecondary"
               gutterBottom
             >
-              {format(new Date(DateEfficiency), "dd 'de' MMMM' ")}
+              {format(parseISO(DateEfficiency), "MMMM dd ', 'yyyy")}
             </Typography>
           </Grid>
           <Grid item xs={12}>
             <HighchartsReact highcharts={Highcharts} options={options} />
+          </Grid>
+          <Grid item xs={12} md={6}>
+            <TableContainer component={Paper}>
+              <Table size="small">
+                <TableHead>
+                  <TableRow>
+                    <TableCell>Factory</TableCell>
+                    <TableCell>Machine</TableCell>
+                    <TableCell>Date</TableCell>
+                    <TableCell>Status</TableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {DataMachine &&
+                    DataMachine.filter(
+                      (row: { factory: string }) => row.factory === 'IMOP',
+                    ).map(
+                      (row: {
+                        id: string;
+                        factory: string;
+                        machine: string;
+                        datatime: Date;
+                        status: string;
+                      }) => (
+                        <TableRow key={row.id}>
+                          <TableCell>{row.factory}</TableCell>
+                          <TableCell>{row.machine}</TableCell>
+                          <TableCell>
+                            {row.datatime
+                              ? format(
+                                  parseISO(row.datatime.toString()),
+                                  'yyyy-MM-dd kk:mm:ss',
+                                )
+                              : ''}
+                          </TableCell>
+                          <TableCell>{row.status}</TableCell>
+                        </TableRow>
+                      ),
+                    )}
+                </TableBody>
+              </Table>
+            </TableContainer>
+          </Grid>
+          <Grid item xs={12} md={6}>
+            <TableContainer component={Paper}>
+              <Table size="small">
+                <TableHead>
+                  <TableRow>
+                    <TableCell>Factory</TableCell>
+                    <TableCell>Machine</TableCell>
+                    <TableCell>Date</TableCell>
+                    <TableCell>Status</TableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {DataMachine &&
+                    DataMachine.filter(
+                      (row: { factory: string }) => row.factory === 'MOSB',
+                    ).map(
+                      (row: {
+                        id: string;
+                        factory: string;
+                        machine: string;
+                        datatime: Date;
+                        status: string;
+                      }) => (
+                        <TableRow key={row.id}>
+                          <TableCell>{row.factory}</TableCell>
+                          <TableCell>{row.machine}</TableCell>
+                          <TableCell>
+                            {row.datatime
+                              ? format(
+                                  parseISO(row.datatime.toString()),
+                                  'yyyy-MM-dd kk:mm:ss',
+                                )
+                              : ''}
+                          </TableCell>
+                          <TableCell>{row.status}</TableCell>
+                        </TableRow>
+                      ),
+                    )}
+                </TableBody>
+              </Table>
+            </TableContainer>
           </Grid>
         </Grid>
       </Container>
