@@ -19,8 +19,6 @@ import HighchartsReact from 'highcharts-react-official';
 import Highcharts from 'highcharts';
 import HighchartsMore from 'highcharts/highcharts-more';
 
-import Card from '@material-ui/core/Card';
-import CardContent from '@material-ui/core/CardContent';
 import { Paper } from '@material-ui/core';
 import api from '../../services/api';
 
@@ -78,13 +76,16 @@ const Dashboard: React.FC = () => {
 
   useEffect(() => {
     loadDataMachine();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   async function loadDataMachine() {
-    const responseMachine = api.post('/filter-date', {
+    const responseMachine = await api.post('/filter-date', {
       date: DateEfficiency,
       machine: 'machine002',
     });
+    return responseMachine && setDataMachine(responseMachine.data);
+    // setDataMachine(responseMachine.data);
   }
 
   function handleSaveSettings() {
@@ -140,6 +141,15 @@ const Dashboard: React.FC = () => {
               gutterBottom
             >
               Machine Efficiency
+            </Typography>
+            <Typography
+              component="h1"
+              variant="h6"
+              align="center"
+              color="textSecondary"
+              gutterBottom
+            >
+              {format(new Date(DateEfficiency), "dd 'de' MMMM' ")}
             </Typography>
           </Grid>
           <Grid item xs={12}>
