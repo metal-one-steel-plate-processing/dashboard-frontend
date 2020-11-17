@@ -1,5 +1,6 @@
+/* eslint-disable react/jsx-props-no-spreading */
 /* eslint-disable no-octal */
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 
 import AppBar from '@material-ui/core/AppBar';
 import Grid from '@material-ui/core/Grid';
@@ -12,25 +13,18 @@ import Drawer from '@material-ui/core/Drawer';
 import Link from '@material-ui/core/Link';
 import Button from '@material-ui/core/Button';
 import TextField from '@material-ui/core/TextField';
-import Table from '@material-ui/core/Table';
-import TableBody from '@material-ui/core/TableBody';
-import TableCell from '@material-ui/core/TableCell';
-import TableContainer from '@material-ui/core/TableContainer';
-import TableHead from '@material-ui/core/TableHead';
-import TableRow from '@material-ui/core/TableRow';
+import Backdrop from '@material-ui/core/Backdrop';
+import CircularProgress from '@material-ui/core/CircularProgress';
 import { parseISO, format } from 'date-fns';
 
 import SettingsIcon from '@material-ui/icons/Settings';
 
-import HighchartsReact from 'highcharts-react-official';
-import Highcharts from 'highcharts';
-import HighchartsMore from 'highcharts/highcharts-more';
-
 import { Paper } from '@material-ui/core';
 
+import Box from '@material-ui/core/Box';
 import api from '../../services/api';
-
-HighchartsMore(Highcharts);
+import Graphic from './graphic';
+import Table from './table';
 
 function Copyright() {
   return (
@@ -47,6 +41,10 @@ const useStyles = makeStyles(theme => ({
   containerDashBoard: {
     minHeight: '100%',
     background: theme.palette.background.paper,
+  },
+  backdrop: {
+    zIndex: theme.zIndex.drawer + 99,
+    color: '#fff',
   },
   drawer: {
     width: 240,
@@ -81,49 +79,63 @@ interface DataMachineInterface {
   datatime: Date;
   status: string;
 }
+
 const Dashboard: React.FC = () => {
   const classes = useStyles();
+  const [loading, setLoading] = useState(false);
   const [OpenDrawer, setOpenDrawer] = useState(false);
-  const [DateEfficiency, setDateEfficiency] = useState(
-    format(new Date(), 'yyyy-MM-dd'),
-  );
+  const allMachines = ['machine001', 'machine002'];
   const [DataMachine, setDataMachine] = useState<DataMachineInterface[] | null>(
     null,
   );
+  const dateRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    loadDataMachine();
+    // loadDataMachine();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   async function loadDataMachine() {
-    const responseMachine = await api.post('/filter-date', {
-      date: DateEfficiency,
-      machine: 'machine001',
-    });
+    // const allMachines =
+    const dateMachine = dateRef.current?.value;
+    setOpenDrawer(false);
+    setLoading(true);
+    let newDataMachine: DataMachineInterface[] | undefined;
 
-    const newDataMachine = responseMachine.data.map(
-      (dataMachine: DataMachineInterface) => {
-        return { ...dataMachine, machine: 'machine001' };
-      },
-    );
+    while (newDataMachine) {
+      newDataMachine.pop();
+    }
 
-    const responseMachine2 = await api.post('/filter-date', {
-      date: DateEfficiency,
-      machine: 'machine002',
-    });
+    for (let i = 0; i < allMachines.length; i += 1) {
+      // eslint-disable-next-line no-await-in-loop
+      const responseMachine = await api.post('/filter-date', {
+        date: dateMachine,
+        machine: allMachines[i],
+      });
 
-    const newDataMachine2 = responseMachine2.data.map(
-      (dataMachine: DataMachineInterface) => {
-        return { ...dataMachine, machine: 'machine002' };
-      },
-    );
+      responseMachine.data
+        .sort(
+          (
+            dataMachine1: DataMachineInterface,
+            dataMachine2: DataMachineInterface,
+          ) => (dataMachine1.datatime > dataMachine2.datatime ? 1 : -1),
+        )
+        // eslint-disable-next-line no-loop-func
+        .map((dataMachine: DataMachineInterface) => {
+          if (newDataMachine) {
+            newDataMachine.push({ ...dataMachine, machine: allMachines[i] });
+          } else {
+            newDataMachine = [{ ...dataMachine, machine: allMachines[i] }];
+          }
 
-    setDataMachine(
-      DataMachine
-        ? DataMachine.concat(newDataMachine.concat(newDataMachine2))
-        : newDataMachine2,
-    );
+          return true;
+        });
+    }
+
+    if (newDataMachine) {
+      setLoading(false);
+      setDataMachine(newDataMachine);
+    }
 
     return true;
     // setDataMachine(responseMachine.data);
@@ -134,44 +146,11 @@ const Dashboard: React.FC = () => {
     loadDataMachine();
   }
 
-  const options = {
-    chart: {
-      type: 'columnrange',
-      inverted: true,
-    },
-    title: {
-      text: '',
-      // text: null // as an alternative
-    },
-    subtitle: {
-      text: '',
-      // text: null // as an alternative
-    },
-    yAxis: {
-      type: 'datetime',
-    },
-
-    xAxis: {
-      categories: ['OP135848 - 1367370A 0 pçs', 'OP135848 - 1367370A 1 pçs'],
-    },
-
-    legend: {
-      enabled: false,
-    },
-    tooltip: {
-      enabled: false,
-    },
-
-    series: [
-      {
-        name: 'Hours',
-        data: [],
-      },
-    ],
-  };
-
   return (
     <div className={classes.containerDashBoard}>
+      <Backdrop className={classes.backdrop} open={loading}>
+        <CircularProgress color="inherit" />
+      </Backdrop>
       <AppBar position="relative">
         <Toolbar>
           <Typography variant="h6" color="inherit" noWrap>
@@ -180,7 +159,7 @@ const Dashboard: React.FC = () => {
         </Toolbar>
       </AppBar>
       <Container maxWidth="xl">
-        <Grid container xs={12}>
+        <Grid container>
           <Grid item xs={12}>
             <Typography
               component="h1"
@@ -198,95 +177,37 @@ const Dashboard: React.FC = () => {
               color="textSecondary"
               gutterBottom
             >
-              {format(parseISO(DateEfficiency), "MMMM dd ', 'yyyy")}
+              {DataMachine ? (
+                dateRef.current?.value && (
+                  <Link
+                    color="inherit"
+                    href="https://dashboard-efficiency.netlify.app/"
+                  >
+                    {format(
+                      parseISO(dateRef.current.value),
+                      "MMMM dd ', 'yyyy",
+                    )}
+                  </Link>
+                )
+              ) : (
+                <TextField
+                  inputRef={dateRef}
+                  type="date"
+                  InputLabelProps={{ shrink: true }}
+                  onChange={() => loadDataMachine()}
+                />
+              )}
             </Typography>
           </Grid>
           <Grid item xs={12}>
-            <HighchartsReact highcharts={Highcharts} options={options} />
+            {DataMachine && (
+              <Graphic dataMachine={DataMachine} allMachines={allMachines} />
+            )}
           </Grid>
-          <Grid item xs={12} md={6}>
-            <TableContainer component={Paper}>
-              <Table size="small">
-                <TableHead>
-                  <TableRow>
-                    <TableCell>Factory</TableCell>
-                    <TableCell>Machine</TableCell>
-                    <TableCell>Date</TableCell>
-                    <TableCell>Status</TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {DataMachine &&
-                    DataMachine.filter(
-                      (row: { factory: string }) => row.factory === 'IMOP',
-                    ).map(
-                      (row: {
-                        id: string;
-                        factory: string;
-                        machine: string;
-                        datatime: Date;
-                        status: string;
-                      }) => (
-                        <TableRow key={row.id}>
-                          <TableCell>{row.factory}</TableCell>
-                          <TableCell>{row.machine}</TableCell>
-                          <TableCell>
-                            {row.datatime
-                              ? format(
-                                  parseISO(row.datatime.toString()),
-                                  'yyyy-MM-dd kk:mm:ss',
-                                )
-                              : ''}
-                          </TableCell>
-                          <TableCell>{row.status}</TableCell>
-                        </TableRow>
-                      ),
-                    )}
-                </TableBody>
-              </Table>
-            </TableContainer>
-          </Grid>
-          <Grid item xs={12} md={6}>
-            <TableContainer component={Paper}>
-              <Table size="small">
-                <TableHead>
-                  <TableRow>
-                    <TableCell>Factory</TableCell>
-                    <TableCell>Machine</TableCell>
-                    <TableCell>Date</TableCell>
-                    <TableCell>Status</TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {DataMachine &&
-                    DataMachine.filter(
-                      (row: { factory: string }) => row.factory === 'MOSB',
-                    ).map(
-                      (row: {
-                        id: string;
-                        factory: string;
-                        machine: string;
-                        datatime: Date;
-                        status: string;
-                      }) => (
-                        <TableRow key={row.id}>
-                          <TableCell>{row.factory}</TableCell>
-                          <TableCell>{row.machine}</TableCell>
-                          <TableCell>
-                            {row.datatime
-                              ? format(
-                                  parseISO(row.datatime.toString()),
-                                  'yyyy-MM-dd kk:mm:ss',
-                                )
-                              : ''}
-                          </TableCell>
-                          <TableCell>{row.status}</TableCell>
-                        </TableRow>
-                      ),
-                    )}
-                </TableBody>
-              </Table>
-            </TableContainer>
+          <Grid item xs={12}>
+            {DataMachine && (
+              <Table dataMahchines={DataMachine} allMachines={allMachines} />
+            )}
           </Grid>
         </Grid>
       </Container>
@@ -301,14 +222,14 @@ const Dashboard: React.FC = () => {
         <Paper elevation={0} className={classes.paper}>
           <Grid container spacing={2}>
             <Grid item xs={12}>
-              <TextField
+              {/* <TextField
                 InputLabelProps={{ shrink: true }}
                 fullWidth
-                value={DateEfficiency}
+                inputRef={dateRef}
                 label="Date"
                 type="date"
-                onChange={e => setDateEfficiency(e.target.value)}
-              />
+                onChange={() => loadDataMachine()}
+              /> */}
             </Grid>
           </Grid>
         </Paper>
@@ -329,14 +250,17 @@ const Dashboard: React.FC = () => {
           </Toolbar>
         </AppBar>
       </Drawer>
-      <Fab
-        color="secondary"
-        className={classes.fab}
-        aria-label="settings"
-        onClick={() => setOpenDrawer(true)}
-      >
-        <SettingsIcon />
-      </Fab>
+      <Box display="none">
+        <Fab
+          color="secondary"
+          className={classes.fab}
+          aria-label="settings"
+          onClick={() => setOpenDrawer(true)}
+        >
+          <SettingsIcon />
+        </Fab>
+      </Box>
+
       <footer className={classes.footer}>
         <Copyright />
       </footer>
