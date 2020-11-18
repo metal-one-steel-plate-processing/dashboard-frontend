@@ -149,29 +149,39 @@ const GraphicDashboard: React.FC<PropsPage> = props => {
             return true;
           });
       }
-      if (
+
+      /* if (
         !statusObject &&
         props.dataMachine &&
-        props.dataMachine.filter(
+        (props.dataMachine.filter(
           (dataMachine: DataMachineInterface) =>
             dataMachine.machine === eachMachine,
-        ).length > 0
-      ) {
-        let statusColor = '#fff';
-        switch (statusLast) {
-          case '0100':
-            statusColor = '#ea4335';
-            break;
-          case '0190':
-            statusColor = '#34a853';
-            break;
-          case '0290':
-            statusColor = '#fbbc05';
-            break;
-          default:
-            break;
-        }
+        ).length > 0 ||
+          statusLastTime !== statusLastGetTime)
+      ) { */
+      let statusColor = '#fff';
+      switch (statusLast) {
+        case '0100':
+          statusColor = '#ea4335';
+          break;
+        case '0190':
+          statusColor = '#34a853';
+          break;
+        case '0290':
+          statusColor = '#fbbc05';
+          break;
+        default:
+          break;
+      }
 
+      if (statusObject) {
+        statusObject.push({
+          status: statusLast,
+          from: statusLastGetTime,
+          to: statusLastTime,
+          color: statusColor,
+        });
+      } else {
         statusObject = [
           {
             status: statusLast,
@@ -181,6 +191,7 @@ const GraphicDashboard: React.FC<PropsPage> = props => {
           },
         ];
       }
+      /* } */
 
       if (statusObject) {
         if (machines) {
