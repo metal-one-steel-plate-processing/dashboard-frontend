@@ -24,7 +24,10 @@
     "react-scripts": "4.0.0",
     "styled-components": "^5.2.1",
     "typescript": "^4.0.3",
-    "web-vitals": "^0.2.4"
+    "web-vitals": "^0.2.4",
+    "unform-material-ui": "^1.0.0",
+    "@unform/core": "^2.0.0",
+    "@unform/web": "^2.0.0"
   },
   "scripts": {
     "start": "react-scripts start",

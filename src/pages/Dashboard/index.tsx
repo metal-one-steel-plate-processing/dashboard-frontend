@@ -84,7 +84,13 @@ const Dashboard: React.FC = () => {
   const classes = useStyles();
   const [loading, setLoading] = useState(false);
   const [OpenDrawer, setOpenDrawer] = useState(false);
-  const allMachines = ['machine001', 'machine002', 'machine003', 'machine004'];
+  const allMachines = [
+    'machine001',
+    'machine002',
+    'machine003',
+    'machine004',
+    'machine005',
+  ];
   const [DataMachine, setDataMachine] = useState<DataMachineInterface[] | null>(
     null,
   );
