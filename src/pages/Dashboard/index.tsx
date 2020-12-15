@@ -90,6 +90,8 @@ const Dashboard: React.FC = () => {
     'machine003',
     'machine004',
     'machine005',
+    'machine006',
+    'machine007',
   ];
   const [DataMachine, setDataMachine] = useState<DataMachineInterface[] | null>(
     null,
