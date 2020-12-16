@@ -98,11 +98,16 @@ const SignIn: React.FC = () => {
 
   function Copyright() {
     return (
-      <Typography variant="body1" color="textPrimary" align="center">
-        {'Copyright © '}
-        <Link color="inherit" href="https://www.mosb.com">
+      <Typography
+        variant="body1"
+        style={{ color: '#FFF' }}
+        color="textPrimary"
+        align="center"
+      >
+        © 2020, powered by
+        <Link style={{ color: '#FFF' }} href="https://www.mosb.com">
+          {' '}
           MOSB
-          {new Date().getFullYear()}
         </Link>
       </Typography>
     );
