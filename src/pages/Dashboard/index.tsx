@@ -15,6 +15,7 @@ import Button from '@material-ui/core/Button';
 import TextField from '@material-ui/core/TextField';
 import Backdrop from '@material-ui/core/Backdrop';
 import CircularProgress from '@material-ui/core/CircularProgress';
+import IconButton from '@material-ui/core/IconButton';
 import { parseISO, format } from 'date-fns';
 
 import SettingsIcon from '@material-ui/icons/Settings';
@@ -22,9 +23,12 @@ import SettingsIcon from '@material-ui/icons/Settings';
 import { Paper } from '@material-ui/core';
 
 import Box from '@material-ui/core/Box';
+import ExitToAppIcon from '@material-ui/icons/ExitToApp';
 import api from '../../services/api';
 import Graphic from './graphic';
 import Table from './table';
+
+import { useAuth } from '../../hooks/AuthContext';
 
 function Copyright() {
   return (
@@ -83,6 +87,9 @@ interface DataMachineInterface {
 const Dashboard: React.FC = () => {
   const classes = useStyles();
   const [loading, setLoading] = useState(false);
+
+  const { signOut } = useAuth();
+
   const [OpenDrawer, setOpenDrawer] = useState(false);
   const allMachines = [
     'machine001',
@@ -160,10 +167,14 @@ const Dashboard: React.FC = () => {
         <CircularProgress color="inherit" />
       </Backdrop>
       <AppBar position="relative">
-        <Toolbar>
+        <Toolbar style={{ justifyContent: 'space-between' }}>
           <Typography variant="h6" color="inherit" noWrap>
             MOSB
           </Typography>
+
+          <IconButton color="inherit" onClick={signOut}>
+            <ExitToAppIcon />
+          </IconButton>
         </Toolbar>
       </AppBar>
       <Container maxWidth="xl">
