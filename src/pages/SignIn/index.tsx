@@ -135,85 +135,73 @@ const SignIn: React.FC = () => {
   }
 
   return (
-    <Box className={classes.authRoot}>
-      <Container component="main" maxWidth="xs">
-        <CssBaseline />
-        <Grid style={{ justifyContent: 'flex-start' }}>
-          <div
-            className={classes.paper}
-            style={{
-              paddingTop: '100px',
-            }}
-          >
-            <Typography style={{ color: '#FFF' }} component="h1" variant="h5">
-              Account Login
-            </Typography>
-            <Form
-              ref={formRef}
-              className={classes.form}
-              onSubmit={handleSubmit}
+    <>
+      <Box className={classes.authRoot}>
+        <Container component="main" maxWidth="xs">
+          <CssBaseline />
+          <Grid style={{ justifyContent: 'flex-start' }}>
+            <div
+              className={classes.paper}
+              style={{
+                paddingTop: '100px',
+              }}
             >
-              <ValidationTextField
-                variant="outlined"
-                margin="normal"
-                fullWidth
-                id="email"
-                label="E-mail"
-                name="email"
-                InputLabelProps={{
-                  className: classes.labelProps,
-                }}
-                inputProps={{
-                  className: classes.input,
-                }}
-                // InputProps={{
-                //   startAdornment: (
-                //     <InputAdornment position="start">
-                //       <EmailIcon style={{ color: '#FFF' }} />
-                //     </InputAdornment>
-                //   ),
-                // }}
-              />
-              <ValidationTextField
-                variant="outlined"
-                margin="normal"
-                fullWidth
-                name="password"
-                label="Password"
-                type="password"
-                id="password"
-                InputLabelProps={{
-                  className: classes.labelProps,
-                }}
-                inputProps={{
-                  className: classes.input,
-                }}
-                // InputProps={{
-                //   startAdornment: (
-                //     <InputAdornment position="start">
-                //       <LockIcon style={{ color: '#FFF' }} />
-                //     </InputAdornment>
-                //   ),
-                // }}
-              />
-              <Button
-                type="submit"
-                fullWidth
-                variant="contained"
-                className={classes.submit}
+              <Typography style={{ color: '#FFF' }} component="h1" variant="h5">
+                Account Login
+              </Typography>
+              <Form
+                ref={formRef}
+                className={classes.form}
+                onSubmit={handleSubmit}
               >
-                <Typography style={{ color: '#204098' }} component="h6">
-                  Login
-                </Typography>
-              </Button>
-            </Form>
-          </div>
-        </Grid>
-      </Container>
-      <Box mt={8}>
-        <Copyright />
+                <ValidationTextField
+                  variant="outlined"
+                  margin="normal"
+                  fullWidth
+                  id="email"
+                  label="E-mail"
+                  name="email"
+                  InputLabelProps={{
+                    className: classes.labelProps,
+                  }}
+                  inputProps={{
+                    className: classes.input,
+                  }}
+                />
+                <ValidationTextField
+                  variant="outlined"
+                  margin="normal"
+                  fullWidth
+                  name="password"
+                  label="Password"
+                  type="password"
+                  id="password"
+                  InputLabelProps={{
+                    className: classes.labelProps,
+                  }}
+                  inputProps={{
+                    className: classes.input,
+                  }}
+                />
+                <Button
+                  type="submit"
+                  fullWidth
+                  variant="contained"
+                  className={classes.submit}
+                >
+                  <Typography style={{ color: '#204098' }} component="h6">
+                    Login
+                  </Typography>
+                </Button>
+              </Form>
+            </div>
+          </Grid>
+        </Container>
+        <Box mt={8}>
+          <Copyright />
+        </Box>
       </Box>
-    </Box>
+    </>
   );
 };
 

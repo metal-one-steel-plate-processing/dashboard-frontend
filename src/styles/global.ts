@@ -1,4 +1,5 @@
 import { createGlobalStyle } from 'styled-components';
+import 'react-toastify/dist/ReactToastify.css';
 
 export default createGlobalStyle`
   *{
@@ -16,6 +17,10 @@ export default createGlobalStyle`
   body, input, button{
     font-family: Roboto, sans-serif;
   }
+  /* .Toastify{
+    position: fixed;
+    z-index: 9999;
+  } */
 
   #root{
     min-height: 100vh

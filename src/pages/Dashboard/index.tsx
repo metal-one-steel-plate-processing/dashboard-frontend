@@ -24,11 +24,10 @@ import { Paper } from '@material-ui/core';
 
 import Box from '@material-ui/core/Box';
 import ExitToAppIcon from '@material-ui/icons/ExitToApp';
+import { useAuth } from '../../hooks/AuthContext';
 import api from '../../services/api';
 import Graphic from './graphic';
 import Table from './table';
-
-import { useAuth } from '../../hooks/AuthContext';
 
 function Copyright() {
   return (
@@ -88,7 +87,7 @@ const Dashboard: React.FC = () => {
   const classes = useStyles();
   const [loading, setLoading] = useState(false);
 
-  const { signOut } = useAuth();
+  const { signOut, user } = useAuth();
 
   const [OpenDrawer, setOpenDrawer] = useState(false);
   const allMachines = [
@@ -172,9 +171,13 @@ const Dashboard: React.FC = () => {
             MOSB
           </Typography>
 
-          <IconButton color="inherit" onClick={signOut}>
-            <ExitToAppIcon />
-          </IconButton>
+          <Typography component="h6" color="inherit" noWrap>
+            Welcome,
+            {user.name}
+            <IconButton color="inherit" onClick={signOut}>
+              <ExitToAppIcon />
+            </IconButton>
+          </Typography>
         </Toolbar>
       </AppBar>
       <Container maxWidth="xl">

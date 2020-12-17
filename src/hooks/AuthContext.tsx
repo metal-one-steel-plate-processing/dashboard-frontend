@@ -1,10 +1,13 @@
 import React, { createContext, useCallback, useState, useContext } from 'react';
+import { toast } from 'react-toastify';
 import api from '../services/api';
 
 interface AuthState {
   token: string;
   // eslint-disable-next-line @typescript-eslint/ban-types
-  user: object;
+  user: {
+    name: string;
+  };
 }
 
 interface SignInCredentials {
@@ -14,7 +17,9 @@ interface SignInCredentials {
 
 interface AuthContextData {
   // eslint-disable-next-line @typescript-eslint/ban-types
-  user: object;
+  user: {
+    name: string;
+  };
   signIn(credentials: SignInCredentials): Promise<void>;
   signOut(): void;
 }
@@ -49,7 +54,7 @@ export const AuthProvider: React.FC = ({ children }) => {
 
       setData({ token, user });
     } catch (error) {
-      // console.log('errou');
+      toast.error('Authenticated failed, check your credentials');
     }
   }, []);
 
