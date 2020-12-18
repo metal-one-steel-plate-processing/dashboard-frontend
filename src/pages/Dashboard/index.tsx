@@ -27,7 +27,6 @@ import ExitToAppIcon from '@material-ui/icons/ExitToApp';
 import { useAuth } from '../../hooks/AuthContext';
 import api from '../../services/api';
 import Graphic from './graphic';
-import Table from './table';
 
 function Copyright() {
   return (
@@ -146,8 +145,9 @@ const Dashboard: React.FC = () => {
         });
     }
 
+    setLoading(false);
+
     if (newDataMachine) {
-      setLoading(false);
       setDataMachine(newDataMachine);
     }
 
@@ -226,11 +226,7 @@ const Dashboard: React.FC = () => {
               <Graphic dataMachine={DataMachine} allMachines={allMachines} />
             )}
           </Grid>
-          <Grid item xs={12}>
-            {DataMachine && (
-              <Table dataMahchines={DataMachine} allMachines={allMachines} />
-            )}
-          </Grid>
+          <Grid item xs={12} />
         </Grid>
       </Container>
       <Drawer
