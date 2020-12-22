@@ -22,6 +22,14 @@ interface AuthContextData {
   };
   signIn(credentials: SignInCredentials): Promise<void>;
   signOut(): void;
+  filtersOptions(filtersSelected: Filters): void;
+  filtersData: Filters;
+}
+
+interface Filters {
+  filterFactories: [{ description: string }] | [];
+  filterGroups: string[];
+  filterMachines: string[];
 }
 
 export const AuthContext = createContext<AuthContextData>(
@@ -29,6 +37,11 @@ export const AuthContext = createContext<AuthContextData>(
 );
 
 export const AuthProvider: React.FC = ({ children }) => {
+  const [filters, setFilters] = useState<Filters>({
+    filterFactories: [],
+    filterGroups: [],
+    filterMachines: [],
+  });
   const [data, setData] = useState<AuthState>(() => {
     const token = localStorage.getItem('@Dashboard:token');
     const user = localStorage.getItem('@Dashboard:user');
@@ -65,8 +78,24 @@ export const AuthProvider: React.FC = ({ children }) => {
     setData({} as AuthState);
   }, []);
 
+  const filtersOptions = useCallback((filtersSelected: Filters) => {
+    setFilters({
+      filterFactories: filtersSelected.filterFactories,
+      filterGroups: filtersSelected.filterGroups,
+      filterMachines: filtersSelected.filterMachines,
+    });
+  }, []);
+
   return (
-    <AuthContext.Provider value={{ user: data.user, signIn, signOut }}>
+    <AuthContext.Provider
+      value={{
+        user: data.user,
+        signIn,
+        signOut,
+        filtersOptions,
+        filtersData: filters,
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );

@@ -1,32 +1,29 @@
 /* eslint-disable react/jsx-props-no-spreading */
 /* eslint-disable no-octal */
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
 import AppBar from '@material-ui/core/AppBar';
 import Grid from '@material-ui/core/Grid';
-import Fab from '@material-ui/core/Fab';
 import Toolbar from '@material-ui/core/Toolbar';
 import Typography from '@material-ui/core/Typography';
 import { makeStyles } from '@material-ui/core/styles';
 import Container from '@material-ui/core/Container';
 import Drawer from '@material-ui/core/Drawer';
 import Link from '@material-ui/core/Link';
-import Button from '@material-ui/core/Button';
 import TextField from '@material-ui/core/TextField';
 import Backdrop from '@material-ui/core/Backdrop';
-import CircularProgress from '@material-ui/core/CircularProgress';
 import IconButton from '@material-ui/core/IconButton';
-import { parseISO, format } from 'date-fns';
+import { format } from 'date-fns';
+import { toast } from 'react-toastify';
 
-import SettingsIcon from '@material-ui/icons/Settings';
-
-import { Paper } from '@material-ui/core';
-
-import Box from '@material-ui/core/Box';
+import MenuIcon from '@material-ui/icons/Menu';
 import ExitToAppIcon from '@material-ui/icons/ExitToApp';
+
+import LinearProgress from '@material-ui/core/LinearProgress';
 import { useAuth } from '../../hooks/AuthContext';
 import api from '../../services/api';
 import Graphic from './graphic';
+import MachineSettings from './machineSettings';
 
 function Copyright() {
   return (
@@ -40,6 +37,12 @@ function Copyright() {
 }
 
 const useStyles = makeStyles(theme => ({
+  menuButton: {
+    marginRight: theme.spacing(2),
+  },
+  title: {
+    flexGrow: 1,
+  },
   containerDashBoard: {
     minHeight: '100%',
     background: theme.palette.background.paper,
@@ -47,26 +50,15 @@ const useStyles = makeStyles(theme => ({
   backdrop: {
     zIndex: theme.zIndex.drawer + 99,
     color: '#fff',
+    display: 'flex',
+    flexDirection: 'column',
+  },
+  progress: {
+    width: '90%',
+    marginBottom: 10,
   },
   drawer: {
-    width: 240,
-  },
-  drawerPaper: {
-    width: 240,
-  },
-  paper: {
-    padding: theme.spacing(2),
-    textAlign: 'center',
-  },
-  appBarBottom: {
-    top: 'auto',
-    bottom: 0,
-    width: 240,
-  },
-  fab: {
-    position: 'fixed',
-    bottom: theme.spacing(2),
-    right: theme.spacing(2),
+    width: 'auto',
   },
   footer: {
     backgroundColor: theme.palette.background.paper,
@@ -82,92 +74,132 @@ interface DataMachineInterface {
   status: string;
 }
 
+interface MachineInterface {
+  id: string;
+  name: string;
+  description: string;
+  group: string;
+  factory: string;
+}
+
 const Dashboard: React.FC = () => {
   const classes = useStyles();
   const [loading, setLoading] = useState(false);
+  const [DateNow, setDateNow] = useState(format(new Date(), 'yyyy-MM-dd'));
+  const [AllMachines, setAllMachines] = useState<MachineInterface[]>([]);
 
   const { signOut, user } = useAuth();
 
   const [OpenDrawer, setOpenDrawer] = useState(false);
-  const allMachines = [
-    'machine001',
-    'machine002',
-    'machine003',
-    'machine004',
-    'machine005',
-    'machine006',
-    'machine007',
-  ];
   const [DataMachine, setDataMachine] = useState<DataMachineInterface[] | null>(
     null,
   );
-  const dateRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    // loadDataMachine();
+    loadMachinesSettings();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [DateNow]);
+
+  async function loadMachinesSettings() {
+    try {
+      setLoading(true);
+      const responseMachineSettings = await api.get('/machine-settings');
+      if (
+        responseMachineSettings.data &&
+        responseMachineSettings.data.length > 0
+      ) {
+        setAllMachines(responseMachineSettings.data);
+      }
+    } catch (error) {
+      toast.error(`machine data not found: ${error}`);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  useEffect(() => {
+    loadDataMachine();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [AllMachines]);
 
   async function loadDataMachine() {
-    // const allMachines =
-    const dateMachine = dateRef.current?.value;
     setOpenDrawer(false);
     setLoading(true);
+    setDataMachine(null);
     let newDataMachine: DataMachineInterface[] | undefined;
 
     while (newDataMachine) {
       newDataMachine.pop();
     }
 
-    for (let i = 0; i < allMachines.length; i += 1) {
-      // eslint-disable-next-line no-await-in-loop
-      const responseMachine = await api.post('/filter-date', {
-        date: dateMachine,
-        machine: allMachines[i],
-      });
+    try {
+      await Promise.all(
+        AllMachines.map(async eachMachine => {
+          const responseMachine = await api.post('/filter-date', {
+            date: DateNow,
+            machine: eachMachine.name,
+          });
 
-      responseMachine.data
-        .sort(
-          (
-            dataMachine1: DataMachineInterface,
-            dataMachine2: DataMachineInterface,
-          ) => (dataMachine1.datatime > dataMachine2.datatime ? 1 : -1),
-        )
-        // eslint-disable-next-line no-loop-func
-        .map((dataMachine: DataMachineInterface) => {
-          if (newDataMachine) {
-            newDataMachine.push({ ...dataMachine, machine: allMachines[i] });
-          } else {
-            newDataMachine = [{ ...dataMachine, machine: allMachines[i] }];
-          }
+          responseMachine.data
+            .sort(
+              (
+                dataMachine1: DataMachineInterface,
+                dataMachine2: DataMachineInterface,
+              ) => (dataMachine1.datatime > dataMachine2.datatime ? 1 : -1),
+            )
+            // eslint-disable-next-line no-loop-func
+            .map((dataMachine: DataMachineInterface) => {
+              if (newDataMachine) {
+                newDataMachine.push({
+                  ...dataMachine,
+                  machine: eachMachine.description,
+                });
+              } else {
+                newDataMachine = [
+                  { ...dataMachine, machine: eachMachine.description },
+                ];
+              }
 
-          return true;
-        });
-    }
+              return true;
+            });
+        }),
+      );
 
-    setLoading(false);
-
-    if (newDataMachine) {
-      setDataMachine(newDataMachine);
+      if (newDataMachine) {
+        setDataMachine(newDataMachine);
+      }
+    } catch (error) {
+      toast.error(`machine data not found: ${error}`);
+    } finally {
+      setLoading(false);
     }
 
     return true;
-    // setDataMachine(responseMachine.data);
-  }
-
-  function handleSaveSettings() {
-    setOpenDrawer(false);
-    loadDataMachine();
   }
 
   return (
     <div className={classes.containerDashBoard}>
       <Backdrop className={classes.backdrop} open={loading}>
-        <CircularProgress color="inherit" />
+        <LinearProgress className={classes.progress} color="secondary" />
+        <Typography align="center">loading machine data</Typography>
       </Backdrop>
       <AppBar position="relative">
         <Toolbar style={{ justifyContent: 'space-between' }}>
-          <Typography variant="h6" color="inherit" noWrap>
+          <IconButton
+            edge="start"
+            className={classes.menuButton}
+            onClick={() => setOpenDrawer(true)}
+            color="inherit"
+            aria-label="menu"
+          >
+            <MenuIcon />
+          </IconButton>
+          <Typography
+            variant="h6"
+            className={classes.title}
+            color="inherit"
+            noWrap
+          >
             MOSB
           </Typography>
 
@@ -192,6 +224,7 @@ const Dashboard: React.FC = () => {
             >
               Machine Efficiency
             </Typography>
+
             <Typography
               component="h1"
               variant="h4"
@@ -199,7 +232,14 @@ const Dashboard: React.FC = () => {
               color="textSecondary"
               gutterBottom
             >
-              {DataMachine ? (
+              <TextField
+                type="date"
+                id="contained-button-date"
+                value={DateNow}
+                InputLabelProps={{ shrink: true }}
+                onChange={e => setDateNow(e.target.value)}
+              />
+              {/* {DataMachine ? (
                 dateRef.current?.value && (
                   <Link
                     color="inherit"
@@ -215,70 +255,33 @@ const Dashboard: React.FC = () => {
                 <TextField
                   inputRef={dateRef}
                   type="date"
+                  value={DateNow}
                   InputLabelProps={{ shrink: true }}
                   onChange={() => loadDataMachine()}
                 />
-              )}
+              )} */}
             </Typography>
           </Grid>
           <Grid item xs={12}>
             {DataMachine && (
-              <Graphic dataMachine={DataMachine} allMachines={allMachines} />
+              <Graphic
+                dataMachine={DataMachine}
+                allMachines={AllMachines}
+                dateMachine={DateNow}
+              />
             )}
           </Grid>
           <Grid item xs={12} />
         </Grid>
       </Container>
       <Drawer
-        anchor="right"
+        anchor="top"
         open={OpenDrawer}
+        onClose={() => setOpenDrawer(false)}
         className={classes.drawer}
-        classes={{
-          paper: classes.drawerPaper,
-        }}
       >
-        <Paper elevation={0} className={classes.paper}>
-          <Grid container spacing={2}>
-            <Grid item xs={12}>
-              {/* <TextField
-                InputLabelProps={{ shrink: true }}
-                fullWidth
-                inputRef={dateRef}
-                label="Date"
-                type="date"
-                onChange={() => loadDataMachine()}
-              /> */}
-            </Grid>
-          </Grid>
-        </Paper>
-        <AppBar
-          position="fixed"
-          color="transparent"
-          className={classes.appBarBottom}
-        >
-          <Toolbar>
-            <Button
-              fullWidth
-              variant="outlined"
-              color="secondary"
-              onClick={() => handleSaveSettings()}
-            >
-              save
-            </Button>
-          </Toolbar>
-        </AppBar>
+        <MachineSettings />
       </Drawer>
-      <Box display="none">
-        <Fab
-          color="secondary"
-          className={classes.fab}
-          aria-label="settings"
-          onClick={() => setOpenDrawer(true)}
-        >
-          <SettingsIcon />
-        </Fab>
-      </Box>
-
       <footer className={classes.footer}>
         <Copyright />
       </footer>

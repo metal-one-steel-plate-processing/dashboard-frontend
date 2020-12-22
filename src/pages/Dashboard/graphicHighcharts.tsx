@@ -2,7 +2,7 @@
 /* eslint-disable react/prop-types */
 /* eslint-disable no-octal */
 import React from 'react';
-import { parseISO, formatDuration } from 'date-fns';
+import { parseISO, formatDuration, startOfToday } from 'date-fns';
 
 import Highcharts from 'highcharts/highcharts-gantt';
 import HighchartsReact from 'highcharts-react-official';
@@ -64,8 +64,8 @@ const GraphicDashboard: React.FC<PropsPage> = props => {
       let connected = 0;
       let statusObject: DealsMachineInterface[] | undefined;
       let statusLast = '';
-      let statusLastTime = 0;
-      let statusLastGetTime = 0;
+      let statusLastTime = startOfToday().getTime();
+      let statusLastGetTime = startOfToday().getTime();
 
       // eslint-disable-next-line react/prop-types
       if (props.dataMachine) {
@@ -271,10 +271,11 @@ const GraphicDashboard: React.FC<PropsPage> = props => {
                   text: '%',
                 },
                 categories: map(series, (s: SeriesInterface) => {
-                  return (
-                    (parseFloat(s.operating.toString()) /
-                      parseFloat(s.connected.toString())) *
-                    100
+                  return (s.operating > 0 && s.connected > 0
+                    ? (parseFloat(s.operating.toString()) /
+                        parseFloat(s.connected.toString())) *
+                      100
+                    : 0
                   ).toFixed(1);
                 }),
               },
