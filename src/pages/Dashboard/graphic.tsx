@@ -62,6 +62,16 @@ const useStyles = makeStyles(theme => ({
   graphicDiv: {
     backgroundColor: theme.palette.background.default,
   },
+  graphicDivConnected: {
+    padding: 1,
+    color: '#fff',
+    backgroundColor: '#db4437',
+  },
+  graphicDivOperating: {
+    padding: 1,
+    color: '#fff',
+    backgroundColor: '#0f9d58',
+  },
 }));
 
 const GraphicDashboard: React.FC<PropsPage> = props => {
@@ -271,7 +281,7 @@ const GraphicDashboard: React.FC<PropsPage> = props => {
             <TableCell>Factory</TableCell>
             <TableCell>Connected</TableCell>
             <TableCell>Operating</TableCell>
-            <TableCell>%</TableCell>
+            <TableCell>Efficiency</TableCell>
             <TableCell>
               <div style={{ width: `${getTimeDiff}px`, float: 'left' }}>
                 {TitleDate?.map((eachTitle: NewTitleDateInterface) => {
@@ -300,19 +310,27 @@ const GraphicDashboard: React.FC<PropsPage> = props => {
               <TableRow key={index.toString()}>
                 <TableCell>{eachSeries.name}</TableCell>
                 <TableCell>{eachSeries.factory}</TableCell>
-                <TableCell>{eachSeries.connected}</TableCell>
-                <TableCell>{eachSeries.operating}</TableCell>
+                <TableCell>
+                  <div className={classes.graphicDivConnected}>
+                    {`${eachSeries.connected} min`}
+                  </div>
+                </TableCell>
+                <TableCell>
+                  <div className={classes.graphicDivOperating}>
+                    {`${eachSeries.operating}  min`}
+                  </div>
+                </TableCell>
                 <TableCell>
                   {eachSeries.connected &&
                   eachSeries.connected > 0 &&
                   eachSeries.operating &&
                   eachSeries.operating > 0
-                    ? (
+                    ? `${(
                         (parseFloat(eachSeries.operating.toString()) /
                           parseFloat(eachSeries.connected.toString())) *
                         100
-                      ).toFixed(2)
-                    : 0}
+                      ).toFixed(2)} %`
+                    : +' %'}
                 </TableCell>
                 <TableCell>
                   <div
