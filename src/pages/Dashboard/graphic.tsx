@@ -77,6 +77,7 @@ const useStyles = makeStyles(theme => ({
 const GraphicDashboard: React.FC<PropsPage> = props => {
   const classes = useStyles();
   const timeZone = 'GMT';
+  const timeZone2 = 'Asia/Colombo';
   const newDate = convertToTimeZone(
     props.dateMachine ? new Date(props.dateMachine) : new Date(),
     { timeZone },
@@ -215,17 +216,20 @@ const GraphicDashboard: React.FC<PropsPage> = props => {
               return true;
             });
         }
-        /* const getTimeNow = new Date().getTime();
+        const getTimeNow =
+          eachMachine.factory === 'MOSB'
+            ? new Date()
+            : convertToTimeZone(new Date(), { timeZone: 'Asia/Colombo' });
 
         if (statusObject) {
           statusObject.push({
             status: statusLast,
             from: statusLastGetTime,
             dayfrom: new Date(statusLastGetTime),
-            to: statusLastTime,
-            dayto: new Date(statusLastTime),
-            marginLeftDiv: (statusLastTime - getTimeEnd) / 72000,
-            widthDiv: 1,
+            to: getTimeNow.getTime(),
+            dayto: getTimeNow,
+            marginLeftDiv: marginLeftDivLast,
+            widthDiv: (getTimeNow.getTime() - statusLastGetTime) / 72000,
             id: '',
           });
         } else {
@@ -234,14 +238,14 @@ const GraphicDashboard: React.FC<PropsPage> = props => {
               status: statusLast,
               from: statusLastGetTime,
               dayfrom: new Date(statusLastGetTime),
-              to: statusLastTime,
-              dayto: new Date(statusLastTime),
-              marginLeftDiv: (statusLastTime - getTimeEnd) / 72000,
-              widthDiv: 1,
+              to: getTimeNow.getTime(),
+              dayto: getTimeNow,
+              marginLeftDiv: marginLeftDivLast,
+              widthDiv: (getTimeNow.getTime() - statusLastGetTime) / 72000,
               id: '',
             },
           ];
-        } */
+        }
 
         if (newSeriesTable) {
           newSeriesTable.push({
@@ -265,7 +269,7 @@ const GraphicDashboard: React.FC<PropsPage> = props => {
 
         return true;
       });
-      // console.log(newSeriesTable);
+      console.log(newSeriesTable);
       if (newSeriesTable) {
         setSeriesTable(newSeriesTable);
       }
