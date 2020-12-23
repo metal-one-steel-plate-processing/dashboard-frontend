@@ -77,7 +77,7 @@ const useStyles = makeStyles(theme => ({
 const GraphicDashboard: React.FC<PropsPage> = props => {
   const classes = useStyles();
   const timeZone = 'GMT';
-  const timeZone2 = 'Asia/Colombo';
+
   const newDate = convertToTimeZone(
     props.dateMachine ? new Date(props.dateMachine) : new Date(),
     { timeZone },
@@ -269,7 +269,7 @@ const GraphicDashboard: React.FC<PropsPage> = props => {
 
         return true;
       });
-      console.log(newSeriesTable);
+
       if (newSeriesTable) {
         setSeriesTable(newSeriesTable);
       }
