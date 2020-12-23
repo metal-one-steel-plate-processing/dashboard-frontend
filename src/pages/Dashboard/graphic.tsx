@@ -91,6 +91,7 @@ const GraphicDashboard: React.FC<PropsPage> = props => {
   const [TitleDate, setTitleDate] = useState<NewTitleDateInterface[] | null>(
     null,
   );
+
   useEffect(() => {
     let newSeriesTable: SeriesTableInterface[] | undefined;
     let newTitleDate: NewTitleDateInterface[] | undefined;
@@ -125,7 +126,7 @@ const GraphicDashboard: React.FC<PropsPage> = props => {
         let connected = 0;
         let statusObject: DealsMachineInterface[] | undefined;
         let statusLast = '';
-        // let statusLastTime = getTimeStart;
+        let statusLastTime = getTimeStart;
         let statusLastGetTime = getTimeStart;
         let marginLeftDivLast = 0;
 
@@ -192,7 +193,7 @@ const GraphicDashboard: React.FC<PropsPage> = props => {
                   (dateConverTimeZone.getTime() - getTimeStart) / 72000;
               }
 
-              // statusLastTime = dateConverTimeZone.getTime();
+              statusLastTime = dateConverTimeZone.getTime();
 
               if (dataMachine.status && dataMachine.status === '0190') {
                 operating += 2;
@@ -216,20 +217,26 @@ const GraphicDashboard: React.FC<PropsPage> = props => {
               return true;
             });
         }
-        const getTimeNow =
-          eachMachine.factory === 'MOSB'
-            ? new Date()
-            : convertToTimeZone(new Date(), { timeZone: 'Asia/Colombo' });
+        const getTimeNow = () => {
+          if (eachMachine.factory === 'MOSB') {
+            return statusLastTime > getTimeEnd
+              ? new Date(getTimeEnd)
+              : new Date(statusLastTime);
+          }
+          return statusLastTime > getTimeEnd
+            ? new Date(getTimeEnd)
+            : new Date(statusLastTime);
+        };
 
         if (statusObject) {
           statusObject.push({
             status: statusLast,
             from: statusLastGetTime,
             dayfrom: new Date(statusLastGetTime),
-            to: getTimeNow.getTime(),
-            dayto: getTimeNow,
+            to: getTimeNow().getTime(),
+            dayto: getTimeNow(),
             marginLeftDiv: marginLeftDivLast,
-            widthDiv: (getTimeNow.getTime() - statusLastGetTime) / 72000,
+            widthDiv: (getTimeNow().getTime() - statusLastGetTime) / 72000,
             id: '',
           });
         } else {
@@ -238,10 +245,10 @@ const GraphicDashboard: React.FC<PropsPage> = props => {
               status: statusLast,
               from: statusLastGetTime,
               dayfrom: new Date(statusLastGetTime),
-              to: getTimeNow.getTime(),
-              dayto: getTimeNow,
+              to: getTimeNow().getTime(),
+              dayto: getTimeNow(),
               marginLeftDiv: marginLeftDivLast,
-              widthDiv: (getTimeNow.getTime() - statusLastGetTime) / 72000,
+              widthDiv: (getTimeNow().getTime() - statusLastGetTime) / 72000,
               id: '',
             },
           ];
