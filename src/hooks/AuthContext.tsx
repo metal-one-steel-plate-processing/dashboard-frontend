@@ -22,14 +22,20 @@ interface AuthContextData {
   };
   signIn(credentials: SignInCredentials): Promise<void>;
   signOut(): void;
-  filtersOptions(filtersSelected: Filters): void;
-  filtersData: Filters;
+  setFilterFactories(factoriesSelected: string[]): void;
+  FactoriesSelected: string[];
+  setFilterGroups(groupsSelected: string[]): void;
+  GroupsSelected: string[];
+  setFilterMachines(machinesSelected: FilterMachines[]): void;
+  MachinesSelected: FilterMachines[];
 }
 
-interface Filters {
-  filterFactories: [{ description: string }] | [];
-  filterGroups: string[];
-  filterMachines: string[];
+interface FilterMachines {
+  id: string;
+  name: string;
+  description: string;
+  group: string;
+  factory: string;
 }
 
 export const AuthContext = createContext<AuthContextData>(
@@ -37,11 +43,11 @@ export const AuthContext = createContext<AuthContextData>(
 );
 
 export const AuthProvider: React.FC = ({ children }) => {
-  const [filters, setFilters] = useState<Filters>({
-    filterFactories: [],
-    filterGroups: [],
-    filterMachines: [],
-  });
+  const [FactoriesSelected, setFactoriesSelected] = useState<string[]>([]);
+  const [GroupsSelected, setGroupsSelected] = useState<string[]>([]);
+  const [MachinesSelected, setMachinesSelected] = useState<FilterMachines[]>(
+    [],
+  );
   const [data, setData] = useState<AuthState>(() => {
     const token = localStorage.getItem('@Dashboard:token');
     const user = localStorage.getItem('@Dashboard:user');
@@ -78,12 +84,17 @@ export const AuthProvider: React.FC = ({ children }) => {
     setData({} as AuthState);
   }, []);
 
-  const filtersOptions = useCallback((filtersSelected: Filters) => {
-    setFilters({
-      filterFactories: filtersSelected.filterFactories,
-      filterGroups: filtersSelected.filterGroups,
-      filterMachines: filtersSelected.filterMachines,
-    });
+  const setFilterFactories = useCallback(filterFactories => {
+    setFactoriesSelected(filterFactories);
+  }, []);
+
+  const setFilterGroups = useCallback(filterGroups => {
+    setGroupsSelected(filterGroups);
+  }, []);
+
+  const setFilterMachines = useCallback(filterMachines => {
+    // console.log(filterMachines);
+    setMachinesSelected(filterMachines);
   }, []);
 
   return (
@@ -92,8 +103,12 @@ export const AuthProvider: React.FC = ({ children }) => {
         user: data.user,
         signIn,
         signOut,
-        filtersOptions,
-        filtersData: filters,
+        setFilterFactories,
+        FactoriesSelected,
+        setFilterGroups,
+        GroupsSelected,
+        setFilterMachines,
+        MachinesSelected,
       }}
     >
       {children}

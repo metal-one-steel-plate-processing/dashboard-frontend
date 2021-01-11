@@ -92,15 +92,137 @@ const useStyles = makeStyles(theme => ({
 const MachineSettings: React.FC = () => {
   const classes = useStyles();
   const [tab, setTab] = useState(0);
-  const { user } = useAuth();
+  const {
+    user,
+    setFilterFactories,
+    FactoriesSelected,
+    setFilterGroups,
+    GroupsSelected,
+    setFilterMachines,
+    MachinesSelected,
+  } = useAuth();
   const formRef = useRef<HTMLFormElement>(null);
   const [loading, setLoading] = useState(false);
   const [AllMachines, setAllMachines] = useState<MachineInterface[]>([]);
-  const [AllGroups, setAllGroups] = useState<GroupsInterface[]>([]);
-  const [AllFactories, setAllFactories] = useState<FactoryInterface[]>([]);
+  const [MachinesFilters, setMachinesFilters] = useState<MachineInterface[]>(
+    [],
+  );
+  const [AllGroups, setAllGroups] = useState<string[]>([]);
+  const [
+    FactoriesSelectedAutoComplete,
+    setFactoriesSelectedAutoComplete,
+  ] = useState<string[]>([]);
+  const [GroupsSelectedAutocomplete, setGroupsSelectedAutocomplete] = useState<
+    string[]
+  >([]);
+  const [AllFactories, setAllFactories] = useState<string[]>([]);
+
   useEffect(() => {
     loadSettings();
   }, []);
+
+  useEffect(() => {
+    setFactoriesSelectedAutoComplete(FactoriesSelected);
+    setGroupsSelectedAutocomplete(GroupsSelected);
+    setFilterMachines([]);
+
+    const machinesFiltered: MachineInterface[] = [];
+    AllMachines.map(eachMachine => {
+      let countMachineFactory = 0;
+      let countMachineGroup = 0;
+      if (FactoriesSelected.length > 0) {
+        FactoriesSelected.map(eachFactory => {
+          if (eachFactory === eachMachine.factory) {
+            countMachineFactory += 1;
+          }
+          return true;
+        });
+      } else {
+        countMachineFactory += 1;
+      }
+
+      if (GroupsSelected.length > 0) {
+        GroupsSelected.map(eachGroup => {
+          if (eachMachine.group === eachGroup) {
+            countMachineGroup += 1;
+          }
+          return true;
+        });
+      } else {
+        countMachineGroup += 1;
+      }
+      // console.log(countMahineFactory);
+      /* console.log('machineFactory');
+      console.log(machineFactory);
+      console.log('machineGroup');
+      console.log(machineGroup); */
+      if (countMachineFactory > 0 && countMachineGroup > 0) {
+        machinesFiltered.push(eachMachine);
+      }
+      return true;
+    });
+    console.log(machinesFiltered);
+    setMachinesFilters(machinesFiltered);
+  }, [AllMachines, FactoriesSelected, GroupsSelected]);
+
+  // useEffect(() => {
+  // const machines: MachineInterface[] = [];
+  // setFilterMachines([]);
+  // AllMachines.map(eachMachine => {
+  /* let machineSelected: MachineInterface | null = { ...eachMachine };
+
+      if (FactoriesSelected.length > 0) {
+        const machineFactories = FactoriesSelected.map(
+          eachFactory => eachMachine.factory === eachFactory && eachMachine,
+        );
+        if (!machineFactories) {
+          machineSelected = null;
+        }
+      }
+      console.log(machineSelected);
+      if (GroupsSelected.length > 0) {
+        GroupsSelected.map(eachGroup => {
+          if (eachMachine.group === eachGroup) {
+            machineSelected = eachMachine;
+          }
+          return true;
+        });
+      }
+
+      console.log(machineSelected); */
+  /* if (FactoriesSelected.length > 0) {
+        const machinesFactories: MachineInterface[] = [];
+
+        FactoriesSelected.map(eachFactory => {
+          if (eachMachine.factory === eachFactory) {
+            return GroupsSelected.length > 0
+              ? machinesFactories.push(eachMachine)
+              : machines.push(eachMachine);
+          }
+          return true;
+        });
+
+        if (GroupsSelected.length > 0) {
+          machinesFactories.map(eachMachineFactory =>
+            GroupsSelected.map(
+              eachGroup =>
+                eachMachineFactory.group === eachGroup &&
+                machines.push(eachMachineFactory),
+            ),
+          );
+        }
+      } else if (GroupsSelected.length > 0) {
+        GroupsSelected.map(
+          eachGroup =>
+            eachMachine.group === eachGroup && machines.push(eachMachine),
+        );
+      } else {
+        machines.push(eachMachine);
+      } */
+  // return machines;
+  // });
+  // setMachinesFilters(machines);
+  // }, [AllMachines, FactoriesSelected, GroupsSelected]);
 
   async function loadSettings() {
     setLoading(true);
@@ -116,22 +238,18 @@ const MachineSettings: React.FC = () => {
 
       const responseGroups = await api.get('/machine-groups');
       if (responseGroups.data && responseGroups.data.length > 0) {
-        setAllGroups(
-          responseGroups.data.map((eachGroup: GroupsInterface) => {
-            return { description: eachGroup.description };
-          }),
+        const groups = responseGroups.data.map(
+          (eachGroup: GroupsInterface) => eachGroup.description,
         );
+        setAllGroups(groups);
       }
 
       const responseFactory = await api.get('/factory');
       if (responseFactory.data && responseFactory.data.length > 0) {
-        setAllFactories(
-          responseFactory.data.map((eachFactory: FactoryInterface) => {
-            return {
-              description: eachFactory.description,
-            };
-          }),
+        const factories = responseFactory.data.map(
+          (eachFactory: FactoryInterface) => eachFactory.description,
         );
+        setAllFactories(factories);
       }
     } catch (error) {
       toast.error(`Settings not found: ${error}`);
@@ -209,7 +327,7 @@ const MachineSettings: React.FC = () => {
         </Tabs>
       </Paper>
       <TabPanel value={tab} index={0}>
-        <Box display="none">
+        <Box>
           <Card>
             <CardContent>
               <Grid spacing={2}>
@@ -217,7 +335,11 @@ const MachineSettings: React.FC = () => {
                   <Autocomplete
                     multiple
                     options={AllFactories}
-                    getOptionLabel={option => option.description}
+                    value={FactoriesSelectedAutoComplete}
+                    getOptionLabel={option => option}
+                    onChange={(event, value) => {
+                      setFilterFactories(value.map(eachValue => eachValue));
+                    }}
                     renderInput={params => (
                       <TextField
                         // eslint-disable-next-line react/jsx-props-no-spreading
@@ -227,12 +349,34 @@ const MachineSettings: React.FC = () => {
                       />
                     )}
                   />
+                  {/* <Autocomplete
+                    multiple
+                    options={AllFactories}
+                    getOptionLabel={option => option.description}
+                    onChange={(event, value) => {
+                      setFilterFactories(
+                        value.map(eachValue => eachValue.description),
+                      );
+                    }}
+                    renderInput={params => (
+                      <TextField
+                        // eslint-disable-next-line react/jsx-props-no-spreading
+                        {...params}
+                        variant="standard"
+                        label="Factories"
+                      />
+                    )}
+                  /> */}
                 </Grid>
                 <Grid item xs={12}>
                   <Autocomplete
                     multiple
                     options={AllGroups}
-                    getOptionLabel={option => option.description}
+                    value={GroupsSelectedAutocomplete}
+                    getOptionLabel={option => option}
+                    onChange={(event, value) => {
+                      setFilterGroups(value.map(eachValue => eachValue));
+                    }}
                     renderInput={params => (
                       <TextField
                         // eslint-disable-next-line react/jsx-props-no-spreading
@@ -242,12 +386,39 @@ const MachineSettings: React.FC = () => {
                       />
                     )}
                   />
+                  {/* <Autocomplete
+                    multiple
+                    options={AllGroups}
+                    value={GroupsSelected.map(eachGroupSelected => {
+                      return { description: eachGroupSelected };
+                    })}
+                    getOptionLabel={option => option.description}
+                    onChange={(event, value) => {
+                      setFilterGroups(
+                        value.map(eachValue => eachValue.description),
+                      );
+                    }}
+                    renderInput={params => (
+                      <TextField
+                        // eslint-disable-next-line react/jsx-props-no-spreading
+                        {...params}
+                        variant="standard"
+                        label="Groups"
+                      />
+                    )}
+                  /> */}
                 </Grid>
                 <Grid item xs={12}>
                   <Autocomplete
                     multiple
-                    options={AllMachines}
-                    getOptionLabel={option => option.description}
+                    options={MachinesFilters}
+                    value={MachinesSelected}
+                    onChange={(event, value) => {
+                      setFilterMachines(value);
+                    }}
+                    getOptionLabel={option =>
+                      // eslint-disable-next-line prettier/prettier
+                      `${option.description} (${option.factory} - ${option.group}) `}
                     renderInput={params => (
                       <TextField
                         // eslint-disable-next-line react/jsx-props-no-spreading
@@ -257,6 +428,27 @@ const MachineSettings: React.FC = () => {
                       />
                     )}
                   />
+
+                  {/* <Autocomplete
+                    multiple
+                    options={FactoriesSelected.map(eachFactorySelected => {
+                      return AllMachines.filter(
+                        eachMachine =>
+                          eachFactorySelected === eachMachine.factory,
+                      );
+                    })}
+                    getOptionLabel={option =>
+                      option.length > 0 && option.description
+                    }
+                    renderInput={params => (
+                      <TextField
+                        // eslint-disable-next-line react/jsx-props-no-spreading
+                        {...params}
+                        variant="standard"
+                        label="Machines"
+                      />
+                    )}
+                  /> */}
                 </Grid>
               </Grid>
             </CardContent>
@@ -326,7 +518,7 @@ const MachineSettings: React.FC = () => {
                               />
                             </TableCell>
                             <TableCell>
-                              <Autocomplete
+                              {/* <Autocomplete
                                 options={AllGroups}
                                 value={{
                                   description: eachMachine.group,
@@ -354,10 +546,10 @@ const MachineSettings: React.FC = () => {
                                     variant="standard"
                                   />
                                 )}
-                              />
+                              /> */}
                             </TableCell>
                             <TableCell>
-                              <Autocomplete
+                              {/* <Autocomplete
                                 options={AllFactories}
                                 value={{
                                   description: eachMachine.factory,
@@ -385,7 +577,7 @@ const MachineSettings: React.FC = () => {
                                     variant="standard"
                                   />
                                 )}
-                              />
+                              /> */}
                             </TableCell>
                           </TableRow>
                         ))}
