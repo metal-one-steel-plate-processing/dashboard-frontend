@@ -1,3 +1,4 @@
+/* eslint-disable camelcase */
 import React, { useState, useEffect, useRef } from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 import Card from '@material-ui/core/Card';
@@ -25,6 +26,7 @@ import { toast } from 'react-toastify';
 
 import { useAuth } from '../../hooks/AuthContext';
 import api from '../../services/api';
+import UserSettings from './userSettings';
 
 interface TabPanelProps {
   // eslint-disable-next-line react/require-default-props
@@ -76,6 +78,13 @@ interface FactoryInterface {
   description: string;
 }
 
+interface UserSettingsInterface {
+  user_name: string;
+  description: string;
+  option1: string;
+  canceled: string;
+}
+
 const useStyles = makeStyles(theme => ({
   backdrop: {
     zIndex: theme.zIndex.drawer + 99,
@@ -101,6 +110,7 @@ const MachineSettings: React.FC = () => {
     setFilterMachines,
     MachinesSelected,
   } = useAuth();
+  const [SettingsUser, setSettingsUser] = useState<UserSettingsInterface[]>([]);
   const formRef = useRef<HTMLFormElement>(null);
   const [loading, setLoading] = useState(false);
   const [AllMachines, setAllMachines] = useState<MachineInterface[]>([]);
@@ -119,12 +129,12 @@ const MachineSettings: React.FC = () => {
 
   useEffect(() => {
     loadSettings();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
     setFactoriesSelectedAutoComplete(FactoriesSelected);
     setGroupsSelectedAutocomplete(GroupsSelected);
-    setFilterMachines([]);
 
     const machinesFiltered: MachineInterface[] = [];
     AllMachines.map(eachMachine => {
@@ -138,7 +148,7 @@ const MachineSettings: React.FC = () => {
           return true;
         });
       } else {
-        countMachineFactory += 1;
+        // countMachineFactory += 1;
       }
 
       if (GroupsSelected.length > 0) {
@@ -149,20 +159,25 @@ const MachineSettings: React.FC = () => {
           return true;
         });
       } else {
-        countMachineGroup += 1;
+        // countMachineGroup += 1;
       }
       // console.log(countMahineFactory);
       /* console.log('machineFactory');
       console.log(machineFactory);
       console.log('machineGroup');
       console.log(machineGroup); */
-      if (countMachineFactory > 0 && countMachineGroup > 0) {
+      if (countMachineFactory > 0 || countMachineGroup > 0) {
         machinesFiltered.push(eachMachine);
+        setFilterMachines([]);
       }
       return true;
     });
-    console.log(machinesFiltered);
-    setMachinesFilters(machinesFiltered);
+    setMachinesFilters(
+      FactoriesSelected.length > 0 || GroupsSelected.length > 0
+        ? machinesFiltered
+        : AllMachines.map(eachMachine => eachMachine),
+    );
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [AllMachines, FactoriesSelected, GroupsSelected]);
 
   // useEffect(() => {
@@ -231,9 +246,39 @@ const MachineSettings: React.FC = () => {
     setAllFactories([]);
 
     try {
+      const responseSettings = await api.get('/user-settings');
+      if (responseSettings.data && responseSettings.data.length > 0) {
+        setSettingsUser(
+          responseSettings.data.filter(
+            (eachSettingsUsers: UserSettingsInterface) =>
+              eachSettingsUsers.user_name === user.name &&
+              eachSettingsUsers.canceled === 'N',
+          ),
+        );
+      }
+
       const responseMachine = await api.get('/machine-settings');
       if (responseMachine.data && responseMachine.data.length > 0) {
-        setAllMachines(responseMachine.data);
+        // setAllMachines(responseMachine.data);
+        const newMachineSettings: React.SetStateAction<MachineInterface[]> = [];
+
+        if (responseSettings.data && responseSettings.data.length > 0) {
+          responseMachine.data.map((eachMachine: MachineInterface) => {
+            const hasMachine = responseSettings.data.filter(
+              (eachSettingsUsers: UserSettingsInterface) =>
+                eachSettingsUsers.user_name === user.name &&
+                eachSettingsUsers.canceled === 'N' &&
+                eachSettingsUsers.description === eachMachine.name &&
+                eachSettingsUsers.option1 === 'allow',
+            );
+            if (hasMachine.length > 0) {
+              newMachineSettings.push(eachMachine);
+            }
+
+            return true;
+          });
+          setAllMachines(newMachineSettings);
+        }
       }
 
       const responseGroups = await api.get('/machine-groups');
@@ -324,6 +369,7 @@ const MachineSettings: React.FC = () => {
         <Tabs value={tab} onChange={handleChangeTab}>
           <Tab label="Filters" {...a11yProps(0)} />
           <Tab label="Settings" {...a11yProps(1)} />
+          <Tab label="Users" {...a11yProps(2)} />
         </Tabs>
       </Paper>
       <TabPanel value={tab} index={0}>
@@ -452,152 +498,162 @@ const MachineSettings: React.FC = () => {
                 </Grid>
               </Grid>
             </CardContent>
-            <CardActions>
-              <Button variant="outlined" color="secondary">
-                Save filters
-              </Button>
-            </CardActions>
           </Card>
         </Box>
       </TabPanel>
-      <Box display={user.name !== 'Demo' ? 'block' : 'none'}>
-        <TabPanel value={tab} index={1}>
-          <form ref={formRef}>
-            <Card>
-              <CardContent>
-                <Typography
-                  gutterBottom
-                  variant="h5"
-                  component="h2"
-                  align="left"
-                >
-                  Machines
-                </Typography>
-                <Divider />
-                <TableContainer>
-                  <Table size="small">
-                    <TableHead>
-                      <TableRow>
-                        <TableCell style={{ display: 'none' }}>Id</TableCell>
-                        <TableCell>Machine</TableCell>
-                        <TableCell>Description</TableCell>
-                        <TableCell>Group</TableCell>
-                        <TableCell>Factory</TableCell>
-                      </TableRow>
-                    </TableHead>
-                    <TableBody>
-                      {AllMachines &&
-                        AllMachines.sort((eachMachine, eachMachine2) =>
-                          eachMachine.name > eachMachine2.name ? 1 : -1,
-                        ).map((eachMachine, index) => (
-                          <TableRow
-                            key={index.toString()}
-                            className="eachLineTable"
-                          >
+      {SettingsUser.map(eachSettingUser => {
+        if (
+          eachSettingUser.description === 'userSettings' &&
+          eachSettingUser.option1 === 'allow'
+        ) {
+          return (
+            <TabPanel value={tab} index={1}>
+              <form ref={formRef}>
+                <Card>
+                  <CardContent>
+                    <Typography
+                      gutterBottom
+                      variant="h5"
+                      component="h2"
+                      align="left"
+                    >
+                      Machines
+                    </Typography>
+                    <Divider />
+                    <TableContainer>
+                      <Table size="small">
+                        <TableHead>
+                          <TableRow>
                             <TableCell style={{ display: 'none' }}>
-                              {eachMachine.id}
+                              Id
                             </TableCell>
-                            <TableCell>{eachMachine.name}</TableCell>
-                            <TableCell>
-                              <TextField
-                                fullWidth
-                                value={eachMachine.description}
-                                onChange={e => {
-                                  setAllMachines(
-                                    AllMachines.map(eachMachine2 => {
-                                      return eachMachine2.name ===
-                                        eachMachine.name
-                                        ? {
-                                            ...eachMachine2,
-                                            description: e.target.value,
-                                          }
-                                        : eachMachine2;
-                                    }),
-                                  );
-                                }}
-                              />
-                            </TableCell>
-                            <TableCell>
-                              {/* <Autocomplete
-                                options={AllGroups}
-                                value={{
-                                  description: eachMachine.group,
-                                }}
-                                onChange={(e, newValue) => {
-                                  setAllMachines(
-                                    AllMachines.map(eachMachine2 => {
-                                      return eachMachine2.name ===
-                                        eachMachine.name
-                                        ? {
-                                            ...eachMachine2,
-                                            group: newValue?.description
-                                              ? newValue.description
-                                              : '',
-                                          }
-                                        : eachMachine2;
-                                    }),
-                                  );
-                                }}
-                                getOptionLabel={option => option.description}
-                                renderInput={params => (
-                                  <TextField
-                                    // eslint-disable-next-line react/jsx-props-no-spreading
-                                    {...params}
-                                    variant="standard"
-                                  />
-                                )}
-                              /> */}
-                            </TableCell>
-                            <TableCell>
-                              {/* <Autocomplete
-                                options={AllFactories}
-                                value={{
-                                  description: eachMachine.factory,
-                                }}
-                                onChange={(e, newValue) => {
-                                  setAllMachines(
-                                    AllMachines.map(eachMachine2 => {
-                                      return eachMachine2.name ===
-                                        eachMachine.name
-                                        ? {
-                                            ...eachMachine2,
-                                            factory: newValue?.description
-                                              ? newValue.description
-                                              : '',
-                                          }
-                                        : eachMachine2;
-                                    }),
-                                  );
-                                }}
-                                getOptionLabel={option => option.description}
-                                renderInput={params => (
-                                  <TextField
-                                    // eslint-disable-next-line react/jsx-props-no-spreading
-                                    {...params}
-                                    variant="standard"
-                                  />
-                                )}
-                              /> */}
-                            </TableCell>
+                            <TableCell>Machine</TableCell>
+                            <TableCell>Description</TableCell>
+                            <TableCell>Group</TableCell>
+                            <TableCell>Factory</TableCell>
                           </TableRow>
-                        ))}
-                    </TableBody>
-                  </Table>
-                </TableContainer>
-              </CardContent>
-              <CardActions>
-                <Button
-                  variant="outlined"
-                  color="secondary"
-                  onClick={() => handleSaveSettings()}
-                >
-                  Save machines
-                </Button>
-              </CardActions>
-            </Card>
-          </form>
-        </TabPanel>
-      </Box>
+                        </TableHead>
+                        <TableBody>
+                          {AllMachines &&
+                            AllMachines.sort((eachMachine, eachMachine2) =>
+                              eachMachine.name > eachMachine2.name ? 1 : -1,
+                            ).map((eachMachine, index) => (
+                              <TableRow
+                                key={index.toString()}
+                                className="eachLineTable"
+                              >
+                                <TableCell style={{ display: 'none' }}>
+                                  {eachMachine.id}
+                                </TableCell>
+                                <TableCell>{eachMachine.name}</TableCell>
+                                <TableCell>
+                                  <TextField
+                                    fullWidth
+                                    value={eachMachine.description}
+                                    onChange={e => {
+                                      setAllMachines(
+                                        AllMachines.map(eachMachine2 => {
+                                          return eachMachine2.name ===
+                                            eachMachine.name
+                                            ? {
+                                                ...eachMachine2,
+                                                description: e.target.value,
+                                              }
+                                            : eachMachine2;
+                                        }),
+                                      );
+                                    }}
+                                  />
+                                </TableCell>
+                                <TableCell>
+                                  <Autocomplete
+                                    options={AllGroups}
+                                    value={eachMachine.group}
+                                    onChange={(e, newValue) => {
+                                      setAllMachines(
+                                        AllMachines.map(eachMachine2 => {
+                                          return eachMachine2.name ===
+                                            eachMachine.name
+                                            ? {
+                                                ...eachMachine2,
+                                                group: newValue || '',
+                                              }
+                                            : eachMachine2;
+                                        }),
+                                      );
+                                    }}
+                                    getOptionLabel={option => option}
+                                    renderInput={params => (
+                                      <TextField
+                                        // eslint-disable-next-line react/jsx-props-no-spreading
+                                        {...params}
+                                        variant="standard"
+                                      />
+                                    )}
+                                  />
+                                </TableCell>
+                                <TableCell>
+                                  <Autocomplete
+                                    options={AllFactories}
+                                    value={eachMachine.factory}
+                                    onChange={(e, newValue) => {
+                                      setAllMachines(
+                                        AllMachines.map(eachMachine2 => {
+                                          return eachMachine2.name ===
+                                            eachMachine.name
+                                            ? {
+                                                ...eachMachine2,
+                                                factory: newValue || '',
+                                              }
+                                            : eachMachine2;
+                                        }),
+                                      );
+                                    }}
+                                    getOptionLabel={option => option}
+                                    renderInput={params => (
+                                      <TextField
+                                        // eslint-disable-next-line react/jsx-props-no-spreading
+                                        {...params}
+                                        variant="standard"
+                                      />
+                                    )}
+                                  />
+                                </TableCell>
+                              </TableRow>
+                            ))}
+                        </TableBody>
+                      </Table>
+                    </TableContainer>
+                  </CardContent>
+                  <CardActions>
+                    <Button
+                      variant="outlined"
+                      color="secondary"
+                      onClick={() => handleSaveSettings()}
+                    >
+                      Save machines
+                    </Button>
+                  </CardActions>
+                </Card>
+              </form>
+            </TabPanel>
+          );
+        }
+        return true;
+      })}
+      {SettingsUser.map(eachSettingUser => {
+        if (
+          eachSettingUser.description === 'userSettings' &&
+          eachSettingUser.option1 === 'allow'
+        ) {
+          return (
+            <TabPanel value={tab} index={2}>
+              <UserSettings />
+            </TabPanel>
+          );
+        }
+        return true;
+      })}
     </>
   );
 };

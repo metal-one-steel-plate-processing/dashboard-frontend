@@ -4,12 +4,15 @@ import { startOfDay, endOfDay, format } from 'date-fns';
 import { convertToTimeZone } from 'date-fns-timezone/dist/convertToTimeZone';
 
 import { makeStyles } from '@material-ui/core/styles';
+import Tooltip from '@material-ui/core/Tooltip';
 import Table from '@material-ui/core/Table';
 import TableBody from '@material-ui/core/TableBody';
 import TableCell from '@material-ui/core/TableCell';
 import TableContainer from '@material-ui/core/TableContainer';
 import TableHead from '@material-ui/core/TableHead';
 import TableRow from '@material-ui/core/TableRow';
+import { Typography } from '@material-ui/core';
+import { formatToTimeZone } from 'date-fns-timezone';
 
 interface DealsMachineInterface {
   status: string;
@@ -56,6 +59,16 @@ interface PropsPage {
   dataMachine: DataMachineInterface[] | null;
   dateMachine: string | undefined;
   allMachines: MachineInterface[];
+  dateTimeMachine: number;
+}
+
+interface DateTimeFactoriesInterface {
+  factory: string;
+  dateTime?: number;
+  marginLeftDiv?: number;
+  dateTimeString?: string;
+  myTimeZone?: string;
+  hourGMTzero?: Date;
 }
 
 const useStyles = makeStyles(theme => ({
@@ -77,6 +90,9 @@ const useStyles = makeStyles(theme => ({
 const GraphicDashboard: React.FC<PropsPage> = props => {
   const classes = useStyles();
   const timeZone = 'GMT';
+  const timeZoneIMOP = 'Asia/Kolkata';
+  const timeZoneMOSB = 'America/Sao_Paulo';
+  const MyTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
 
   const newDate = convertToTimeZone(
     props.dateMachine ? new Date(props.dateMachine) : new Date(),
@@ -91,10 +107,14 @@ const GraphicDashboard: React.FC<PropsPage> = props => {
   const [TitleDate, setTitleDate] = useState<NewTitleDateInterface[] | null>(
     null,
   );
+  const [DateTimeFactories, setDateTimeFactories] = useState<
+    DateTimeFactoriesInterface[] | null
+  >(null);
 
   useEffect(() => {
     let newSeriesTable: SeriesTableInterface[] | undefined;
     let newTitleDate: NewTitleDateInterface[] | undefined;
+    let newFactories: DateTimeFactoriesInterface[] | undefined;
     for (let i = getTimeStart; i <= getTimeEnd; i += 3600000) {
       if (newTitleDate) {
         newTitleDate.push({
@@ -129,6 +149,16 @@ const GraphicDashboard: React.FC<PropsPage> = props => {
         let statusLastTime = getTimeStart;
         let statusLastGetTime = getTimeStart;
         let marginLeftDivLast = 0;
+
+        if (newFactories) {
+          const factoriesexisting = newFactories.filter(
+            eachFactory => eachFactory.factory === eachMachine.factory,
+          );
+          if (factoriesexisting.length === 0)
+            newFactories.push({ factory: eachMachine.factory });
+        } else {
+          newFactories = [{ factory: eachMachine.factory }];
+        }
 
         if (props.dataMachine) {
           // eslint-disable-next-line react/prop-types
@@ -280,8 +310,147 @@ const GraphicDashboard: React.FC<PropsPage> = props => {
       if (newSeriesTable) {
         setSeriesTable(newSeriesTable);
       }
+
+      if (newFactories) {
+        setDateTimeFactories(newFactories);
+      }
     }
   }, [getTimeEnd, getTimeStart, props.allMachines, props.dataMachine]);
+
+  useEffect(() => {
+    if (DateTimeFactories) {
+      const TimeMilessegundos = convertToTimeZone(props.dateTimeMachine, {
+        timeZone,
+      });
+      setDateTimeFactories(
+        DateTimeFactories.map(
+          (eachDateTimeFactory: DateTimeFactoriesInterface) => {
+            if (MyTimezone === 'America/Sao_Paulo') {
+              if (eachDateTimeFactory.factory === 'MOSB') {
+                return {
+                  ...eachDateTimeFactory,
+                  dateTime: props.dateTimeMachine,
+                  marginLeftDiv:
+                    props.dateTimeMachine > getTimeStart
+                      ? (props.dateTimeMachine - getTimeStart) / 72000
+                      : -1200,
+                  dateTimeString: format(props.dateTimeMachine, 'HH:mm:ss'),
+                  myTimeZone: MyTimezone,
+                  hourGMTzero: TimeMilessegundos,
+                };
+              }
+              if (eachDateTimeFactory.factory === 'IMOP') {
+                const TimeMilessegundosIMOP = convertToTimeZone(
+                  props.dateTimeMachine,
+                  {
+                    timeZone: timeZoneIMOP,
+                  },
+                );
+                return {
+                  ...eachDateTimeFactory,
+                  dateTime: TimeMilessegundosIMOP.getTime(),
+                  marginLeftDiv:
+                    (TimeMilessegundosIMOP.getTime() - getTimeStart) / 72000,
+                  dateTimeString: formatToTimeZone(
+                    props.dateTimeMachine,
+                    'HH:mm:ss',
+                    { timeZone: timeZoneIMOP },
+                  ),
+                  myTimeZone: `${MyTimezone} 1`,
+                  hourGMTzero: TimeMilessegundos,
+                };
+              }
+              return {
+                ...eachDateTimeFactory,
+                dateTime: 0,
+                marginLeftDiv: 0,
+                dateTimeString: '',
+              };
+            }
+            if (MyTimezone === 'Asia/Kolkata') {
+              if (eachDateTimeFactory.factory === 'MOSB') {
+                const TimeMilessegundosMOSB = convertToTimeZone(
+                  TimeMilessegundos,
+                  {
+                    timeZone: timeZoneMOSB,
+                  },
+                );
+
+                return {
+                  ...eachDateTimeFactory,
+                  dateTime: TimeMilessegundosMOSB.getTime(),
+                  marginLeftDiv:
+                    (TimeMilessegundosMOSB.getTime() - getTimeStart) / 72000,
+                  dateTimeString: format(props.dateTimeMachine, 'HH:mm:ss'),
+                  myTimeZone: MyTimezone,
+                  hourGMTzero: TimeMilessegundos,
+                };
+              }
+              if (eachDateTimeFactory.factory === 'IMOP') {
+                return {
+                  ...eachDateTimeFactory,
+                  dateTime: props.dateTimeMachine,
+                  marginLeftDiv:
+                    props.dateTimeMachine > getTimeStart
+                      ? (props.dateTimeMachine - getTimeStart) / 72000
+                      : -1200,
+                  dateTimeString: format(props.dateTimeMachine, 'HH:mm:ss'),
+                  myTimeZone: MyTimezone,
+                  hourGMTzero: TimeMilessegundos,
+                };
+              }
+            }
+
+            if (eachDateTimeFactory.factory === 'MOSB') {
+              const TimeMilessegundosMOSB = convertToTimeZone(
+                TimeMilessegundos,
+                {
+                  timeZone: timeZoneMOSB,
+                },
+              );
+
+              return {
+                ...eachDateTimeFactory,
+                dateTime: TimeMilessegundosMOSB.getTime(),
+                marginLeftDiv:
+                  (TimeMilessegundosMOSB.getTime() - getTimeStart) / 72000,
+                dateTimeString: format(props.dateTimeMachine, 'HH:mm:ss'),
+                myTimeZone: MyTimezone,
+                hourGMTzero: TimeMilessegundos,
+              };
+            }
+            if (eachDateTimeFactory.factory === 'IMOP') {
+              const TimeMilessegundosIMOP = convertToTimeZone(
+                TimeMilessegundos,
+                {
+                  timeZone: timeZoneIMOP,
+                },
+              );
+
+              return {
+                ...eachDateTimeFactory,
+                dateTime: TimeMilessegundosIMOP.getTime(),
+                marginLeftDiv:
+                  (TimeMilessegundosIMOP.getTime() - getTimeStart) / 72000,
+                dateTimeString: format(props.dateTimeMachine, 'HH:mm:ss'),
+                myTimeZone: MyTimezone,
+                hourGMTzero: TimeMilessegundos,
+              };
+            }
+            return {
+              ...eachDateTimeFactory,
+              dateTime: 0,
+              marginLeftDiv: 0,
+              dateTimeString: '',
+              myTimeZone: MyTimezone,
+              hourGMTzero: TimeMilessegundos,
+            };
+          },
+        ),
+      );
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [props.dateTimeMachine]);
 
   return (
     <TableContainer>
@@ -293,7 +462,48 @@ const GraphicDashboard: React.FC<PropsPage> = props => {
             <TableCell>Connected</TableCell>
             <TableCell>Operating</TableCell>
             <TableCell>Efficiency</TableCell>
+            <TableCell style={{ display: 'none' }}>My Timezone</TableCell>
             <TableCell>
+              <div
+                style={{
+                  width: `${getTimeDiff}px`,
+                  float: 'left',
+                  position: 'fixed',
+                }}
+              >
+                {DateTimeFactories?.map(eachDateTimeFactory => {
+                  return (
+                    <div
+                      style={{
+                        position: 'absolute',
+                        color: 'black',
+                        height: `${
+                          SeriesTable ? (SeriesTable.length + 2) * 34 : 0
+                        }px`,
+                        marginLeft: `${eachDateTimeFactory.marginLeftDiv}px`,
+                        display: 'flex',
+                        alignItems: 'flex-end',
+                        borderLeft: '1px solid rgba(0, 0, 0, 0.38)',
+                        opacity: '0.3',
+                        padding: '0px 10px',
+                      }}
+                    >
+                      <Tooltip
+                        // eslint-disable-next-line prettier/prettier
+                        title={(
+                          <Typography>
+                            <p>{`My Timezone: ${eachDateTimeFactory.myTimeZone}`}</p>
+                            <p>{`Hour GMT Zero: ${eachDateTimeFactory.hourGMTzero}`}</p>
+                          </Typography>
+                          // eslint-disable-next-line prettier/prettier
+                        )}
+                      >
+                        <Typography>{`${eachDateTimeFactory.factory} - ${eachDateTimeFactory.dateTimeString}`}</Typography>
+                      </Tooltip>
+                    </div>
+                  );
+                })}
+              </div>
               <div style={{ width: `${getTimeDiff}px`, float: 'left' }}>
                 {TitleDate?.map((eachTitle: NewTitleDateInterface) => {
                   return (
@@ -318,7 +528,10 @@ const GraphicDashboard: React.FC<PropsPage> = props => {
             SeriesTable.sort((eachSeries, eachSeries2) =>
               eachSeries.factory > eachSeries2.factory ? 1 : -1,
             ).map((eachSeries: SeriesTableInterface, index: number) => (
-              <TableRow key={index.toString()}>
+              <TableRow
+                key={index.toString()}
+                style={{ padding: '0px !important' }}
+              >
                 <TableCell>{eachSeries.name}</TableCell>
                 <TableCell>{eachSeries.factory}</TableCell>
                 <TableCell>
@@ -343,6 +556,7 @@ const GraphicDashboard: React.FC<PropsPage> = props => {
                       ).toFixed(2)} %`
                     : +' %'}
                 </TableCell>
+                <TableCell style={{ display: 'none' }}>{MyTimezone}</TableCell>
                 <TableCell>
                   <div
                     className={classes.graphicDiv}
@@ -385,6 +599,11 @@ const GraphicDashboard: React.FC<PropsPage> = props => {
                 </TableCell>
               </TableRow>
             ))}
+          {/* {timeZones.map(eachTimezone => (
+            <TableRow>
+              <TableCell colSpan={7}>{eachTimezone}</TableCell>
+            </TableRow>
+          ))} */}
         </TableBody>
       </Table>
     </TableContainer>
