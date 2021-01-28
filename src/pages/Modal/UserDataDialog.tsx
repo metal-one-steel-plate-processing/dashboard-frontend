@@ -16,6 +16,7 @@ import TextField from '@material-ui/core/TextField';
 import { toast } from 'react-toastify';
 import Grid from '@material-ui/core/Grid';
 import api from '../../services/api';
+import { useAuth } from '../../hooks/AuthContext';
 
 export interface ModalHandles {
   openModal: (id: string) => void;
@@ -34,6 +35,7 @@ const ModalUser: React.ForwardRefRenderFunction<ModalHandles> = (
   const [visible, setVisible] = useState(false);
   const [userData, setUserData] = useState({} as UserProps);
   const formRefChangePassword = useRef<HTMLFormElement>(null);
+  const { signOut } = useAuth();
 
   async function openModal(id: string) {
     const response = await api.get(`users/${id}`);
@@ -44,7 +46,9 @@ const ModalUser: React.ForwardRefRenderFunction<ModalHandles> = (
   async function handleChangePassword() {
     try {
       const inputs = formRefChangePassword.current?.elements;
-      let data = {};
+      let data = {
+        email: userData.email,
+      };
       if (inputs) {
         for (let i = 0; i < inputs?.length; i += 1) {
           const valueInput = (inputs[i] as HTMLInputElement).value;
@@ -53,14 +57,12 @@ const ModalUser: React.ForwardRefRenderFunction<ModalHandles> = (
           if (tipoInput === 'password') {
             data = { ...data, [nameInput]: valueInput };
           }
-          if (tipoInput === 'text') {
-            data = { ...data, [nameInput]: valueInput };
-          }
         }
       }
 
       await api.post('/user-change-password', data);
-      toast.success('Password changed successfully');
+      toast.success('Password changed successfully, please login again');
+      signOut();
       setVisible(false);
     } catch (error) {
       toast.error(
@@ -92,13 +94,6 @@ const ModalUser: React.ForwardRefRenderFunction<ModalHandles> = (
           </Typography>
 
           <form ref={formRefChangePassword}>
-            <TextField
-              name="email"
-              type="text"
-              value={userData.email}
-              style={{ display: 'none' }}
-            />
-
             <Grid xs={12}>
               <TextField
                 autoFocus
