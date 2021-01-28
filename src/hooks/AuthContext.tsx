@@ -7,6 +7,7 @@ interface AuthState {
   // eslint-disable-next-line @typescript-eslint/ban-types
   user: {
     name: string;
+    id: string;
   };
 }
 
@@ -19,6 +20,7 @@ interface AuthContextData {
   // eslint-disable-next-line @typescript-eslint/ban-types
   user: {
     name: string;
+    id: string;
   };
   signIn(credentials: SignInCredentials): Promise<void>;
   signOut(): void;

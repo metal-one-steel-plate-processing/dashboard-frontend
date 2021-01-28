@@ -105,7 +105,7 @@ const SignIn: React.FC = () => {
         align="center"
       >
         © 2020, powered by
-        <Link style={{ color: '#FFF' }} href="https://www.mosb.com">
+        <Link style={{ color: '#FFF' }} href="https://www.mosb.com.br">
           {' '}
           MOSB
         </Link>
