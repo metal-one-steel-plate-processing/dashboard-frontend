@@ -18,6 +18,7 @@ import background from '../../assets/image.jpg';
 interface LoginProps {
   email: string;
   password: string;
+  timezone: string;
 }
 
 const useStyles = makeStyles(theme => ({
@@ -113,7 +114,7 @@ const SignIn: React.FC = () => {
     );
   }
 
-  async function handleSubmit({ email, password }: LoginProps) {
+  async function handleSubmit({ email, password, timezone }: LoginProps) {
     formRef.current?.setErrors({});
 
     const schema = Yup.object().shape({
@@ -131,6 +132,7 @@ const SignIn: React.FC = () => {
     signIn({
       email,
       password,
+      timezone,
     });
   }
 

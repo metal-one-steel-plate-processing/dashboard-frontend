@@ -14,6 +14,7 @@ interface AuthState {
 interface SignInCredentials {
   email: string;
   password: string;
+  timezone: string;
 }
 
 interface AuthContextData {
@@ -61,11 +62,14 @@ export const AuthProvider: React.FC = ({ children }) => {
     return {} as AuthState;
   });
 
+  const MyTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+
   const signIn = useCallback(async ({ email, password }) => {
     try {
       const response = await api.post('sessions', {
         email,
         password,
+        timezone: MyTimezone,
       });
 
       const { token, user } = response.data;
@@ -77,6 +81,7 @@ export const AuthProvider: React.FC = ({ children }) => {
     } catch (error) {
       toast.error('Authenticated failed, check your credentials');
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const signOut = useCallback(() => {

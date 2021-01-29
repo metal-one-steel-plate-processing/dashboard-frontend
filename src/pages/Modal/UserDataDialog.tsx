@@ -35,6 +35,7 @@ const ModalUser: React.ForwardRefRenderFunction<ModalHandles> = (
   const [visible, setVisible] = useState(false);
   const [userData, setUserData] = useState({} as UserProps);
   const formRefChangePassword = useRef<HTMLFormElement>(null);
+  const MyTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
   const { signOut } = useAuth();
 
   async function openModal(id: string) {
@@ -48,6 +49,8 @@ const ModalUser: React.ForwardRefRenderFunction<ModalHandles> = (
       const inputs = formRefChangePassword.current?.elements;
       let data = {
         email: userData.email,
+        page: 'pages/modal/UserDataDialog',
+        timezone: MyTimezone,
       };
       if (inputs) {
         for (let i = 0; i < inputs?.length; i += 1) {

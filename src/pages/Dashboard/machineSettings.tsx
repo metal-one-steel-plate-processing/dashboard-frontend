@@ -126,6 +126,7 @@ const MachineSettings: React.FC = () => {
     string[]
   >([]);
   const [AllFactories, setAllFactories] = useState<string[]>([]);
+  const MyTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
 
   useEffect(() => {
     loadSettings();
@@ -343,6 +344,10 @@ const MachineSettings: React.FC = () => {
                 description: eachSettings.description,
                 group: eachSettings.group,
                 factory: eachSettings.factory,
+                page: 'Pages/Dashboard/machineSettings',
+                user: user.name,
+                user_id: user.id,
+                timezone: MyTimezone,
               });
             }),
           );
