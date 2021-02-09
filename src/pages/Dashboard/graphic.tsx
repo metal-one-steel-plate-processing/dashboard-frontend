@@ -240,6 +240,27 @@ const GraphicDashboard: React.FC<PropsPage> = props => {
                 connected += 2;
               }
 
+              if (
+                dataMachine.status &&
+                (dataMachine.status === '0101' ||
+                  dataMachine.status === '0102' ||
+                  dataMachine.status === '0103' ||
+                  dataMachine.status === '0180' ||
+                  dataMachine.status === '0181' ||
+                  dataMachine.status === '0182' ||
+                  dataMachine.status === '0183' ||
+                  dataMachine.status === '0380' ||
+                  dataMachine.status === '0382' ||
+                  dataMachine.status === '0383' ||
+                  dataMachine.status === '0500' ||
+                  dataMachine.status === '0580' ||
+                  dataMachine.status === '8188' ||
+                  dataMachine.status === '8588')
+              ) {
+                operating += 2;
+                connected += 2;
+              }
+
               if (dataMachine.status && dataMachine.status === '0100') {
                 connected += 2;
               }
