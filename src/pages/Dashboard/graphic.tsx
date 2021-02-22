@@ -595,7 +595,7 @@ const GraphicDashboard: React.FC<PropsPage> = props => {
               >
                 <TableCell>
                   <img
-                    src={eachSeries.factory === 'IMOP' ? TagMOSB : TagIMOP}
+                    src={eachSeries.factory === 'IMOP' ? TagIMOP : TagMOSB}
                     alt={eachSeries.factory}
                     height="17"
                   />
