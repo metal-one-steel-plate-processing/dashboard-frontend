@@ -100,6 +100,8 @@ interface SettingsInterface {
   description: string;
   values: string[];
   defaultValue?: string;
+  defaultValue2?: number;
+  type?: string;
 }
 
 const UserEdit: React.ForwardRefRenderFunction<DialogHandles, PropsPage> = (
@@ -166,6 +168,7 @@ const UserEdit: React.ForwardRefRenderFunction<DialogHandles, PropsPage> = (
             name: eachMachine.name,
             description: `${eachMachine.name} ${eachMachine.description} - ( ${eachMachine.factory} )`,
             values: ['allow', 'deny'],
+            type: 'machine',
           });
         },
       );
@@ -186,7 +189,11 @@ const UserEdit: React.ForwardRefRenderFunction<DialogHandles, PropsPage> = (
           );
 
           if (hasSettings.length > 0) {
-            return { ...eachNewSettings, defaultValue: hasSettings[0].option1 };
+            return {
+              ...eachNewSettings,
+              defaultValue: hasSettings[0].option1,
+              defaultValue2: parseFloat(hasSettings[0].option2),
+            };
           }
 
           return eachNewSettings;
@@ -218,6 +225,8 @@ const UserEdit: React.ForwardRefRenderFunction<DialogHandles, PropsPage> = (
               description: dataLines[0].innerHTML,
               option1: (dataLines[2].children[0].children[0].children[0]
                 .children[0] as HTMLInputElement).value,
+              option2: (dataLines[3].children[0].children[0]
+                .children[0] as HTMLInputElement).value,
             });
           }
         }
@@ -225,6 +234,7 @@ const UserEdit: React.ForwardRefRenderFunction<DialogHandles, PropsPage> = (
           if (settingsUsers.length === 0) {
             throw new Error('any data');
           }
+          // console.log(settingsUsers);
 
           await api.post('/user-settings', {
             user_logged: user.name,
@@ -302,11 +312,23 @@ const UserEdit: React.ForwardRefRenderFunction<DialogHandles, PropsPage> = (
                       <TableCell style={{ display: 'none' }}>Name</TableCell>
                       <TableCell>Description</TableCell>
                       <TableCell />
+                      <TableCell width={50}>Sequence</TableCell>
                     </TableRow>
                   </TableHead>
                   <TableBody>
                     {AllSettings &&
-                      AllSettings.map((eachSettings, index) => (
+                      AllSettings.sort((eachSettings, eachSettings2) => {
+                        if (
+                          eachSettings.defaultValue2 &&
+                          eachSettings2.defaultValue2
+                        ) {
+                          return eachSettings.defaultValue2 >
+                            eachSettings2.defaultValue2
+                            ? 1
+                            : -1;
+                        }
+                        return 0;
+                      }).map((eachSettings, index) => (
                         <TableRow
                           key={index.toString()}
                           className="eachLineTableEditUser"
@@ -331,6 +353,22 @@ const UserEdit: React.ForwardRefRenderFunction<DialogHandles, PropsPage> = (
                                 />
                               )}
                             />
+                          </TableCell>
+                          <TableCell>
+                            {eachSettings.type &&
+                            eachSettings.type === 'machine' ? (
+                              <TextField
+                                defaultValue={eachSettings.defaultValue2}
+                                name="sequence"
+                                type="number"
+                              />
+                            ) : (
+                              <TextField
+                                disabled
+                                name="sequence"
+                                type="number"
+                              />
+                            )}
                           </TableCell>
                         </TableRow>
                       ))}

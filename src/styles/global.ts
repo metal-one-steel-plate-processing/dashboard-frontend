@@ -95,8 +95,8 @@ export default createGlobalStyle`
     color: #34a853;
   }
   .status0290{
-    background-color: #fbbc05;
-    color: #fbbc05;
+    background-color: #34a853;
+    color: #34a853;
   }
   .status0390{
     background-color: #34a853;

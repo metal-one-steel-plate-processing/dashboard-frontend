@@ -14,8 +14,12 @@ import TableRow from '@material-ui/core/TableRow';
 import { Typography } from '@material-ui/core';
 import { formatToTimeZone } from 'date-fns-timezone';
 
+import TagMOSB from '../../assets/brasil.png';
+import TagIMOP from '../../assets/india.png';
+
 interface DealsMachineInterface {
   status: string;
+  statusString: string;
   from: number;
   dayfrom: Date;
   to: number;
@@ -31,6 +35,7 @@ interface SeriesTableInterface {
   operating?: number;
   connected?: number;
   deals: DealsMachineInterface[] | null;
+  sequenceMachine?: number;
 }
 
 interface DataMachineInterface {
@@ -53,6 +58,7 @@ interface MachineInterface {
   description: string;
   group: string;
   factory: string;
+  sequenceMachine?: string;
 }
 
 interface PropsPage {
@@ -76,11 +82,16 @@ const useStyles = makeStyles(theme => ({
     backgroundColor: theme.palette.background.default,
   },
   graphicDivConnected: {
+    float: 'left',
+    width: '80px',
     padding: 1,
     color: '#fff',
     backgroundColor: '#db4437',
   },
   graphicDivOperating: {
+    marginLeft: '10px',
+    float: 'left',
+    width: '80px',
     padding: 1,
     color: '#fff',
     backgroundColor: '#0f9d58',
@@ -146,6 +157,8 @@ const GraphicDashboard: React.FC<PropsPage> = props => {
         let connected = 0;
         let statusObject: DealsMachineInterface[] | undefined;
         let statusLast = '';
+        let statusString = '';
+        let statusLastString = '';
         let statusLastTime = getTimeStart;
         let statusLastGetTime = getTimeStart;
         let marginLeftDivLast = 0;
@@ -183,61 +196,23 @@ const GraphicDashboard: React.FC<PropsPage> = props => {
                   timeZone,
                 },
               );
-              if (statusLast && statusLast !== `status${dataMachine.status}`) {
-                if (statusObject) {
-                  statusObject.push({
-                    status: statusLast,
-                    from: statusLastGetTime,
-                    dayfrom: new Date(statusLastGetTime),
-                    to: dateConverTimeZone.getTime(),
-                    dayto: dateConverTimeZone,
-                    marginLeftDiv: marginLeftDivLast,
-                    widthDiv:
-                      (dateConverTimeZone.getTime() - statusLastGetTime) /
-                      72000,
-                    id: dataMachine.id,
-                  });
-                } else {
-                  statusObject = [
-                    {
-                      status: statusLast,
-                      from: statusLastGetTime,
-                      dayfrom: new Date(statusLastGetTime),
-                      to: dateConverTimeZone.getTime(),
-                      dayto: dateConverTimeZone,
-                      marginLeftDiv: marginLeftDivLast,
-                      widthDiv:
-                        (dateConverTimeZone.getTime() - statusLastGetTime) /
-                        72000,
-                      id: dataMachine.id,
-                    },
-                  ];
-                }
-                statusLast = `status${dataMachine.status}`;
-                statusLastGetTime = dateConverTimeZone.getTime();
-                marginLeftDivLast = 0;
-              } else if (!statusLast) {
-                statusLast = `status${dataMachine.status}`;
-                statusLastGetTime = dateConverTimeZone.getTime();
-                marginLeftDivLast =
-                  (dateConverTimeZone.getTime() - getTimeStart) / 72000;
-              }
-
-              statusLastTime = dateConverTimeZone.getTime();
 
               if (dataMachine.status && dataMachine.status === '0190') {
                 operating += 2;
                 connected += 2;
+                statusString = 'Operating';
               }
 
               if (dataMachine.status && dataMachine.status === '0290') {
                 operating += 2;
                 connected += 2;
+                statusString = 'Operating';
               }
 
               if (dataMachine.status && dataMachine.status === '0390') {
                 operating += 2;
                 connected += 2;
+                statusString = 'Operating';
               }
 
               if (
@@ -259,11 +234,59 @@ const GraphicDashboard: React.FC<PropsPage> = props => {
               ) {
                 operating += 2;
                 connected += 2;
+                statusString = 'Operating';
               }
 
               if (dataMachine.status && dataMachine.status === '0100') {
                 connected += 2;
+                statusString = 'Not Operating';
               }
+
+              if (statusLast && statusLast !== `status${dataMachine.status}`) {
+                if (statusObject) {
+                  statusObject.push({
+                    status: statusLast,
+                    statusString: statusLastString,
+                    from: statusLastGetTime,
+                    dayfrom: new Date(statusLastGetTime),
+                    to: dateConverTimeZone.getTime(),
+                    dayto: dateConverTimeZone,
+                    marginLeftDiv: marginLeftDivLast,
+                    widthDiv:
+                      (dateConverTimeZone.getTime() - statusLastGetTime) /
+                      72000,
+                    id: dataMachine.id,
+                  });
+                } else {
+                  statusObject = [
+                    {
+                      status: statusLast,
+                      statusString: statusLastString,
+                      from: statusLastGetTime,
+                      dayfrom: new Date(statusLastGetTime),
+                      to: dateConverTimeZone.getTime(),
+                      dayto: dateConverTimeZone,
+                      marginLeftDiv: marginLeftDivLast,
+                      widthDiv:
+                        (dateConverTimeZone.getTime() - statusLastGetTime) /
+                        72000,
+                      id: dataMachine.id,
+                    },
+                  ];
+                }
+                statusLast = `status${dataMachine.status}`;
+                statusLastString = statusString;
+                statusLastGetTime = dateConverTimeZone.getTime();
+                marginLeftDivLast = 0;
+              } else if (!statusLast) {
+                statusLast = `status${dataMachine.status}`;
+                statusLastGetTime = dateConverTimeZone.getTime();
+                statusLastString = statusString;
+                marginLeftDivLast =
+                  (dateConverTimeZone.getTime() - getTimeStart) / 72000;
+              }
+
+              statusLastTime = dateConverTimeZone.getTime();
 
               return true;
             });
@@ -282,6 +305,7 @@ const GraphicDashboard: React.FC<PropsPage> = props => {
         if (statusObject) {
           statusObject.push({
             status: statusLast,
+            statusString: statusLastString,
             from: statusLastGetTime,
             dayfrom: new Date(statusLastGetTime),
             to: getTimeNow().getTime(),
@@ -294,6 +318,7 @@ const GraphicDashboard: React.FC<PropsPage> = props => {
           statusObject = [
             {
               status: statusLast,
+              statusString: statusLastString,
               from: statusLastGetTime,
               dayfrom: new Date(statusLastGetTime),
               to: getTimeNow().getTime(),
@@ -309,6 +334,9 @@ const GraphicDashboard: React.FC<PropsPage> = props => {
           newSeriesTable.push({
             name: eachMachine.description,
             factory: eachMachine.factory,
+            sequenceMachine: parseFloat(
+              eachMachine.sequenceMachine ? eachMachine.sequenceMachine : '0',
+            ),
             operating,
             connected,
             deals: statusObject || null,
@@ -318,6 +346,9 @@ const GraphicDashboard: React.FC<PropsPage> = props => {
             {
               name: eachMachine.description,
               factory: eachMachine.factory,
+              sequenceMachine: parseFloat(
+                eachMachine.sequenceMachine ? eachMachine.sequenceMachine : '0',
+              ),
               operating,
               connected,
               deals: statusObject || null,
@@ -478,11 +509,15 @@ const GraphicDashboard: React.FC<PropsPage> = props => {
       <Table size="small">
         <TableHead>
           <TableRow>
-            <TableCell>Machine</TableCell>
-            <TableCell>Factory</TableCell>
-            <TableCell>Connected</TableCell>
-            <TableCell>Operating</TableCell>
-            <TableCell>Efficiency</TableCell>
+            <TableCell>
+              <div style={{ width: '180px' }}>Machine</div>
+            </TableCell>
+            <TableCell>
+              <div style={{ width: '170px' }}>Connected / Operating</div>
+            </TableCell>
+            <TableCell>
+              <div style={{ width: '70px' }}>Efficiency</div>
+            </TableCell>
             <TableCell style={{ display: 'none' }}>My Timezone</TableCell>
             <TableCell>
               <div
@@ -546,21 +581,30 @@ const GraphicDashboard: React.FC<PropsPage> = props => {
         </TableHead>
         <TableBody>
           {SeriesTable &&
-            SeriesTable.sort((eachSeries, eachSeries2) =>
-              eachSeries.factory > eachSeries2.factory ? 1 : -1,
-            ).map((eachSeries: SeriesTableInterface, index: number) => (
+            SeriesTable.sort((eachSeries, eachSeries2) => {
+              if (eachSeries.sequenceMachine && eachSeries2.sequenceMachine) {
+                return eachSeries.sequenceMachine > eachSeries2.sequenceMachine
+                  ? 1
+                  : -1;
+              }
+              return 0;
+            }).map((eachSeries: SeriesTableInterface, index: number) => (
               <TableRow
                 key={index.toString()}
                 style={{ padding: '0px !important' }}
               >
-                <TableCell>{eachSeries.name}</TableCell>
-                <TableCell>{eachSeries.factory}</TableCell>
+                <TableCell>
+                  <img
+                    src={eachSeries.factory === 'IMOP' ? TagMOSB : TagIMOP}
+                    alt={eachSeries.factory}
+                    height="17"
+                  />
+                  {` ${eachSeries.factory} - ${eachSeries.name}`}
+                </TableCell>
                 <TableCell>
                   <div className={classes.graphicDivConnected}>
                     {`${eachSeries.connected} min`}
                   </div>
-                </TableCell>
-                <TableCell>
                   <div className={classes.graphicDivOperating}>
                     {`${eachSeries.operating}  min`}
                   </div>
@@ -587,7 +631,28 @@ const GraphicDashboard: React.FC<PropsPage> = props => {
                       ? eachSeries.deals.map(
                           (eachDeal: DealsMachineInterface) => {
                             return (
-                              <>
+                              <Tooltip
+                                // eslint-disable-next-line prettier/prettier
+                                title={(
+                                  <>
+                                    <Typography>{`${eachSeries.factory} ${eachSeries.name} - ${eachDeal.statusString}`}</Typography>
+                                    <Typography>
+                                      {format(
+                                        new Date(eachDeal.from),
+                                        'MMMM dd, yyyy',
+                                      )}
+                                      {` ( ${format(
+                                        new Date(eachDeal.from),
+                                        ' HH:mm',
+                                      )} - ${format(
+                                        new Date(eachDeal.to),
+                                        ' HH:mm',
+                                      )} )`}
+                                    </Typography>
+                                  </>
+                                  // eslint-disable-next-line prettier/prettier
+                                )}
+                              >
                                 <div
                                   className={eachDeal.status}
                                   style={{
@@ -601,17 +666,7 @@ const GraphicDashboard: React.FC<PropsPage> = props => {
                                   </span>
                                   .
                                 </div>
-
-                                {/* <div
-                                className={eachDeal.status}
-                                style={{
-                                  width: eachDeal.widthDiv,
-                                  float: 'left',
-                                }}
-                              >
-                                .
-                              </div> */}
-                              </>
+                              </Tooltip>
                             );
                           },
                         )

@@ -38,6 +38,7 @@ interface MachineInterface {
   description: string;
   group: string;
   factory: string;
+  sequenceMachine: string;
 }
 
 interface PropsPage {
@@ -148,7 +149,10 @@ const LoadDataMachines: React.FC<PropsPage> = props => {
                     newMachines.push(eachMachineSettings);
                   }
                 } else {
-                  newMachines.push(eachMachineSettings);
+                  newMachines.push({
+                    ...eachMachineSettings,
+                    sequenceMachine: hasMachine[0].option2,
+                  });
                 }
               }
               return true;
