@@ -1,6 +1,5 @@
 /* eslint-disable camelcase */
 import React, { useState, useEffect, useRef } from 'react';
-import { Link } from 'react-router-dom';
 import { makeStyles } from '@material-ui/core/styles';
 import Card from '@material-ui/core/Card';
 import CardContent from '@material-ui/core/CardContent';
@@ -24,9 +23,6 @@ import Backdrop from '@material-ui/core/Backdrop';
 import LinearProgress from '@material-ui/core/LinearProgress';
 import { CardActions } from '@material-ui/core';
 import { toast } from 'react-toastify';
-import List from '@material-ui/core/List';
-import ListItem from '@material-ui/core/ListItem';
-import ListItemText from '@material-ui/core/ListItemText';
 
 import { useAuth } from '../../hooks/AuthContext';
 import api from '../../services/api';
@@ -379,7 +375,6 @@ const MachineSettings: React.FC = () => {
           <Tab label="Filters" {...a11yProps(0)} />
           <Tab label="Settings" {...a11yProps(1)} />
           <Tab label="Users" {...a11yProps(2)} />
-          <Tab label="Pages" {...a11yProps(3)} />
         </Tabs>
       </Paper>
       <TabPanel value={tab} index={0}>
@@ -664,16 +659,6 @@ const MachineSettings: React.FC = () => {
         }
         return true;
       })}
-      <TabPanel value={tab} index={3}>
-        <List>
-          <ListItem component={Link} to="/dashboard" button>
-            <ListItemText primary="Dasboard" />
-          </ListItem>
-          <ListItem component={Link} to="/report" button>
-            <ListItemText primary="Machine Efficiency Report" />
-          </ListItem>
-        </List>
-      </TabPanel>
     </>
   );
 };

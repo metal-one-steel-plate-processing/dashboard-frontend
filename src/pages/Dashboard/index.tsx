@@ -1,6 +1,9 @@
+/* eslint-disable import/no-duplicates */
+/* eslint-disable no-sequences */
 /* eslint-disable react/jsx-props-no-spreading */
 /* eslint-disable no-octal */
 import React, { useState, useRef } from 'react';
+import { Link as LinkRD } from 'react-router-dom';
 
 import AppBar from '@material-ui/core/AppBar';
 import Grid from '@material-ui/core/Grid';
@@ -10,14 +13,20 @@ import { makeStyles } from '@material-ui/core/styles';
 import Container from '@material-ui/core/Container';
 import Drawer from '@material-ui/core/Drawer';
 import Link from '@material-ui/core/Link';
-import TextField from '@material-ui/core/TextField';
 import IconButton from '@material-ui/core/IconButton';
 import { format } from 'date-fns';
 import Avatar from '@material-ui/core/Avatar';
 
+import DateFnsUtils from '@date-io/date-fns';
+import enLocale from 'date-fns/locale/en-US';
+import { DatePicker, MuiPickersUtilsProvider } from '@material-ui/pickers';
+import { convertToTimeZone } from 'date-fns-timezone/dist/convertToTimeZone';
+
 import MenuIcon from '@material-ui/icons/Menu';
 import ExitToAppIcon from '@material-ui/icons/ExitToApp';
+import TimelineIcon from '@material-ui/icons/Timeline';
 
+import Tooltip from '@material-ui/core/Tooltip';
 import ModalUser, { ModalHandles } from '../Modal/UserDataDialog';
 import { useAuth } from '../../hooks/AuthContext';
 import LoadDataMachines from './loadDataMachines';
@@ -65,6 +74,7 @@ const Dashboard: React.FC = () => {
   const classes = useStyles();
   const [DateNow, setDateNow] = useState(format(new Date(), 'yyyy-MM-dd'));
   const dialogRef = useRef<ModalHandles>(null);
+  const timeZone = 'GMT';
 
   const { signOut, user } = useAuth();
 
@@ -73,7 +83,6 @@ const Dashboard: React.FC = () => {
   function handleOpenModalUser(id: string) {
     dialogRef.current?.openModal(id);
   }
-
   return (
     <>
       <div className={classes.containerDashBoard}>
@@ -113,19 +122,52 @@ const Dashboard: React.FC = () => {
           </Toolbar>
         </AppBar>
         <Container maxWidth="xl">
-          <Grid container>
+          <Grid container justify="center">
             <Grid item xs={12}>
               <Typography
                 component="h1"
                 variant="h2"
                 align="center"
                 color="textPrimary"
-                gutterBottom
               >
                 Machine Efficiency
               </Typography>
+            </Grid>
+          </Grid>
+          <Grid container direction="row" justify="center" alignItems="center">
+            <Grid item xs={6} sm={4} md={3} lg={2} xl={1}>
+              <Typography align="right" gutterBottom>
+                <MuiPickersUtilsProvider utils={DateFnsUtils} locale={enLocale}>
+                  <DatePicker
+                    value={convertToTimeZone(new Date(DateNow), { timeZone })}
+                    format="MMMM d, yyyy"
+                    onChange={
+                      date =>
+                        date && setDateNow(format(new Date(date), 'yyyy-MM-dd'))
+                      /* console.log(date),
+                        console.log(date),
+                        console.log(DateNow) */
+                      // eslint-disable-next-line react/jsx-curly-newline
+                    }
+                  />
+                </MuiPickersUtilsProvider>
+              </Typography>
+            </Grid>
+            <Grid item xs={2} sm={1}>
+              <Tooltip title="Report">
+                <Typography
+                  align="left"
+                  gutterBottom
+                  component={LinkRD}
+                  to="/report"
+                >
+                  <IconButton>
+                    <TimelineIcon style={{ color: '#000' }} />
+                  </IconButton>
+                </Typography>
+              </Tooltip>
 
-              <Typography
+              {/* <Typography
                 component="h1"
                 variant="h4"
                 align="center"
@@ -139,7 +181,7 @@ const Dashboard: React.FC = () => {
                   InputLabelProps={{ shrink: true }}
                   onChange={e => setDateNow(e.target.value)}
                 />
-              </Typography>
+              </Typography> */}
             </Grid>
             <Grid item xs={12}>
               <LoadDataMachines Date={DateNow} />

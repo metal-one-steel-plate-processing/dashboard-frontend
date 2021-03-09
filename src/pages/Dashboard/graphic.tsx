@@ -85,8 +85,8 @@ const useStyles = makeStyles(theme => ({
     float: 'left',
     width: '80px',
     padding: 1,
-    color: '#fff',
-    backgroundColor: '#db4437',
+    /* color: '#fff',
+    backgroundColor: '#f44336', */
   },
   graphicDivOperating: {
     marginLeft: '10px',
@@ -94,7 +94,7 @@ const useStyles = makeStyles(theme => ({
     width: '80px',
     padding: 1,
     color: '#fff',
-    backgroundColor: '#0f9d58',
+    backgroundColor: '#4caf50',
   },
 }));
 
@@ -619,7 +619,7 @@ const GraphicDashboard: React.FC<PropsPage> = props => {
                           parseFloat(eachSeries.connected.toString())) *
                         100
                       ).toFixed(2)} %`
-                    : +' %'}
+                    : '-'}
                 </TableCell>
                 <TableCell style={{ display: 'none' }}>{MyTimezone}</TableCell>
                 <TableCell>

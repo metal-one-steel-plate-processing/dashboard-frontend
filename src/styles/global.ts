@@ -26,80 +26,92 @@ export default createGlobalStyle`
     min-height: 100vh
   }
 
+  .high{
+    background-color: #0091ea;
+    color: #fff;
+  }
+  .middle{
+    background-color: #00b8d4;
+    color: #fff;
+  }
+  .low{
+    background-color: #00bfa5;
+    color: #fff;
+  }
   .status0100{
-    background-color: #ea4335;
-    color: #ea4335;
+    background-color: #f44336;
+    color: #f44336;
   }
   .status0101{
-    background-color: #34a853;
-    color: #34a853;
+    background-color: #4caf50;
+    color: #4caf50;
   }
   .status0102{
-    background-color: #34a853;
-    color: #34a853;
+    background-color: #4caf50;
+    color: #4caf50;
   }
   .status0103{
-    background-color: #34a853;
-    color: #34a853;
+    background-color: #4caf50;
+    color: #4caf50;
   }
   .status0180{
-    background-color: #34a853;
-    color: #34a853;
+    background-color: #4caf50;
+    color: #4caf50;
   }
   .status0181{
-    background-color: #34a853;
-    color: #34a853;
+    background-color: #4caf50;
+    color: #4caf50;
   }
   .status0182{
-    background-color: #34a853;
-    color: #34a853;
+    background-color: #4caf50;
+    color: #4caf50;
   }
   .status0183{
-    background-color: #34a853;
-    color: #34a853;
+    background-color: #4caf50;
+    color: #4caf50;
   }
   .status0190{
-    background-color: #34a853;
-    color: #34a853;
+    background-color: #4caf50;
+    color: #4caf50;
   }
   .status0190{
-    background-color: #34a853;
-    color: #34a853;
+    background-color: #4caf50;
+    color: #4caf50;
   }
   .status0380{
-    background-color: #34a853;
-    color: #34a853;
+    background-color: #4caf50;
+    color: #4caf50;
   }
   .status0382{
-    background-color: #34a853;
-    color: #34a853;
+    background-color: #4caf50;
+    color: #4caf50;
   }
   .status0383{
-    background-color: #34a853;
-    color: #34a853;
+    background-color: #4caf50;
+    color: #4caf50;
   }
   .status0500{
-    background-color: #34a853;
-    color: #34a853;
+    background-color: #4caf50;
+    color: #4caf50;
   }
   .status0580{
-    background-color: #34a853;
-    color: #34a853;
+    background-color: #4caf50;
+    color: #4caf50;
   }
   .status8188{
-    background-color: #34a853;
-    color: #34a853;
+    background-color: #4caf50;
+    color: #4caf50;
   }
   .status8588{
-    background-color: #34a853;
-    color: #34a853;
+    background-color: #4caf50;
+    color: #4caf50;
   }
   .status0290{
-    background-color: #34a853;
-    color: #34a853;
+    background-color: #4caf50;
+    color: #4caf50;
   }
   .status0390{
-    background-color: #34a853;
-    color: #34a853;
+    background-color: #4caf50;
+    color: #4caf50;
   }
 `;
