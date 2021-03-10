@@ -552,13 +552,13 @@ const LoadDataMachinesReport: React.FC = () => {
         <Grid item xs={3}>
           <Box display="flex" justifyContent="flex-end">
             <Box className="low" component={Paper} p={1} mr={1}>
-              0-90
+              1 - 90
             </Box>
             <Box className="middle" component={Paper} p={1} mr={1}>
-              90-95
+              90 - 95
             </Box>
             <Box className="high" component={Paper} p={1}>
-              {'>95'}
+              {'> 95'}
             </Box>
           </Box>
         </Grid>

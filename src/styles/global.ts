@@ -27,15 +27,15 @@ export default createGlobalStyle`
   }
 
   .high{
-    background-color: #0091ea;
+    background-color: #20bf55;
     color: #fff;
   }
   .middle{
-    background-color: #00b8d4;
+    background-color: #0b4f6c;
     color: #fff;
   }
   .low{
-    background-color: #00bfa5;
+    background-color: #01baef;
     color: #fff;
   }
   .status0100{
