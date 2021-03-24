@@ -21,6 +21,14 @@ import { convertToTimeZone } from 'date-fns-timezone/dist/convertToTimeZone';
 import { DateRangePicker, DateRange } from 'materialui-daterange-picker';
 import ArrowBackIcon from '@material-ui/icons/ArrowBack';
 import { Box, IconButton, Paper, Tooltip } from '@material-ui/core';
+
+import Button from '@material-ui/core/Button';
+
+import { CSVLink } from 'react-csv';
+
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faFileCsv } from '@fortawesome/free-solid-svg-icons';
+
 import { toast } from 'react-toastify';
 
 import { useAuth } from '../../hooks/AuthContext';
@@ -78,6 +86,13 @@ interface SeriesInterface {
   efficiency_style: string;
 }
 
+interface SeriesExportInterface {
+  machine: string;
+  operating?: number;
+  connected?: number;
+  efficiency?: number;
+}
+
 const LoadDataMachinesReport: React.FC = () => {
   const classes = useStyles();
   const timeZone = 'GMT';
@@ -107,6 +122,7 @@ const LoadDataMachinesReport: React.FC = () => {
     });
 
   const [series, setSeries] = useState<SeriesInterface[]>([]);
+  const [seriesExport, setSeriesExport] = useState<SeriesExportInterface[]>([]);
 
   const toggle = () => setOpen(!open);
 
@@ -126,6 +142,13 @@ const LoadDataMachinesReport: React.FC = () => {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [DataMachine]);
+
+  useEffect(() => {
+    if (series.length > 0) {
+      loadSeriesExport();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [series]);
 
   async function loadMachinesSettings() {
     try {
@@ -377,6 +400,7 @@ const LoadDataMachinesReport: React.FC = () => {
   async function loadData() {
     // console.log('loadData');
     const newSeries: SeriesInterface[] = [];
+
     AllMachines.map(eachMachine => {
       // console.log(eachMachine);
       eachDay?.map(eachDaySelected => {
@@ -490,6 +514,106 @@ const LoadDataMachinesReport: React.FC = () => {
       }).map((eachDataMachine: DataMachineInterface) => {});
     }); */
   }
+
+  function loadSeriesExport() {
+    /* console.log('*************loadSeriesExport'); */
+    const newDataSeriesExport: SeriesExportInterface[] = [];
+
+    AllMachines.sort((eachMachine, eachMachine2) => {
+      if (eachMachine.sequenceMachine && eachMachine2.sequenceMachine) {
+        return parseFloat(eachMachine.sequenceMachine) >
+          parseFloat(eachMachine2.sequenceMachine)
+          ? 1
+          : -1;
+      }
+      return 0;
+    }).map(eachMachine => {
+      /* console.log(indexEachMachine); */
+      let eachDataSeriesExport = {};
+      eachDay &&
+        eachDay.map(eachDaySelected => {
+          const dataSeriesMachine = series
+            ? series.filter(
+                (eachSeries: SeriesInterface) =>
+                  eachSeries.machineId === eachMachine.id &&
+                  eachSeries.eachDay === eachDaySelected.getDate(),
+              )
+            : [];
+
+          /* console.log(eachMachine.id);
+          console.log(eachDaySelected.getDate()); */
+          /* console.log('dataSeriesMachine');
+          console.log(dataSeriesMachine); */
+          /* indexEachMachine === 0 &&
+            eachDataSeriesExport = {
+              ...eachDataSeriesExport,
+              Machine: '',
+              [`${format(eachDaySelected, "MMMM d',' yyyy")} Connected`]: format(eachDaySelected, "MMMM d',' yyyy"),
+              [`${format(eachDaySelected, "MMMM d',' yyyy")} Operating`]: '',
+              [`${format(eachDaySelected, "MMMM d',' yyyy")} Efficiency`]: '',
+            }; */
+          /* const eachDaySelectedData = {
+            Machine: `${eachMachine.factory} - ${eachMachine.description}`,
+            Connected:
+              dataSeriesMachine && dataSeriesMachine.length > 0
+                ? dataSeriesMachine[0].connected
+                : '-',
+            Operating:
+              dataSeriesMachine && dataSeriesMachine.length > 0
+                ? dataSeriesMachine[0].operating
+                : '-',
+            Efficiency:
+              dataSeriesMachine && dataSeriesMachine.length > 0
+                ? dataSeriesMachine[0].efficiency?.toFixed(2)
+                : '-',
+          };
+          console.log('eachDaySelectedData: ');
+          console.log(eachDaySelectedData);
+
+          eachDataSeriesExport =
+            indexEachMachine === 0
+              ? {
+                  ...eachDataSeriesExport,
+                  Machine: 'Machine',
+                  Connected: format(eachDaySelected, "MMMM d',' yyyy"),
+                  Operating: '',
+                  Efficiency: '',
+                }
+              : eachDataSeriesExport;
+
+          eachDataSeriesExport = {
+            ...eachDataSeriesExport,
+            ...eachDaySelectedData,
+          }; */
+          eachDataSeriesExport = {
+            ...eachDataSeriesExport,
+            Machine: `${eachMachine.factory} - ${eachMachine.description}`,
+            [`${format(eachDaySelected, "MMMM d',' yyyy")} Connected`]:
+              dataSeriesMachine && dataSeriesMachine.length > 0
+                ? dataSeriesMachine[0].connected
+                : '-',
+            [`${format(eachDaySelected, "MMMM d',' yyyy")} Operating`]:
+              dataSeriesMachine && dataSeriesMachine.length > 0
+                ? dataSeriesMachine[0].operating
+                : '-',
+            [`${format(eachDaySelected, "MMMM d',' yyyy")} Efficiency`]:
+              dataSeriesMachine && dataSeriesMachine.length > 0
+                ? dataSeriesMachine[0].efficiency?.toFixed(2)
+                : '-',
+          };
+
+          return true;
+        });
+      /* console.log('+++eachDataSeriesExport :');
+      console.log(eachDataSeriesExport); */
+      newDataSeriesExport.push(eachDataSeriesExport as SeriesExportInterface);
+      return true;
+    });
+
+    /* console.log(newDataSeriesExport); */
+    setSeriesExport(newDataSeriesExport);
+  }
+
   return (
     <>
       <Backdrop className={classes.backdrop} open={loading}>
@@ -582,6 +706,29 @@ const LoadDataMachinesReport: React.FC = () => {
               onChange={range => setDateRange(range)}
             />
           </div>
+        </Grid>
+      </Grid>
+      <Grid container spacing={2} justify="flex-end">
+        <Grid item xs={3} lg={2} style={{ flex: 'inherit' }}>
+          <CSVLink
+            style={{ textDecoration: 'none' }}
+            filename={`MachineEfficiency_${
+              dateRange.startDate && format(dateRange.startDate, 'MMMM_d_yyyy')
+            }_to_${
+              dateRange.endDate && format(dateRange.endDate, 'MMMM_d_yyyy')
+            }.csv`}
+            data={seriesExport}
+            separator=";"
+          >
+            <Button
+              variant="outlined"
+              color="default"
+              size="small"
+              startIcon={<FontAwesomeIcon icon={faFileCsv} size="lg" />}
+            >
+              Export CSV
+            </Button>
+          </CSVLink>
         </Grid>
         <Grid item xs={12}>
           <TableContainer className={classes.container}>

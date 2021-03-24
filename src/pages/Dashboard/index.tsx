@@ -25,6 +25,7 @@ import { convertToTimeZone } from 'date-fns-timezone/dist/convertToTimeZone';
 import MenuIcon from '@material-ui/icons/Menu';
 import ExitToAppIcon from '@material-ui/icons/ExitToApp';
 import TimelineIcon from '@material-ui/icons/Timeline';
+/* import TouchAppIcon from '@material-ui/icons/TouchApp'; */
 
 import Tooltip from '@material-ui/core/Tooltip';
 import ModalUser, { ModalHandles } from '../Modal/UserDataDialog';
@@ -153,7 +154,7 @@ const Dashboard: React.FC = () => {
                 </MuiPickersUtilsProvider>
               </Typography>
             </Grid>
-            <Grid item xs={2} sm={1}>
+            <Grid item xs={3} sm={2}>
               <Tooltip title="Report">
                 <Typography
                   align="left"
@@ -166,6 +167,18 @@ const Dashboard: React.FC = () => {
                   </IconButton>
                 </Typography>
               </Tooltip>
+              {/* <Tooltip title="Appointments Operators">
+                <Typography
+                  align="left"
+                  gutterBottom
+                  component={LinkRD}
+                  to="/appointments"
+                >
+                  <IconButton>
+                    <TouchAppIcon style={{ color: '#000' }} />
+                  </IconButton>
+                </Typography>
+              </Tooltip> */}
 
               {/* <Typography
                 component="h1"

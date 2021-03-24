@@ -127,7 +127,10 @@ const LoadDataMachines: React.FC<PropsPage> = props => {
                       eachMachineSettings.description,
                   );
                   if (machineSelected.length > 0) {
-                    newMachines.push(eachMachineSettings);
+                    newMachines.push({
+                      ...eachMachineSettings,
+                      sequenceMachine: hasMachine[0].option2,
+                    });
                   }
                 } else if (GroupsSelected.length > 0) {
                   if (GroupsSelected.indexOf(eachMachineSettings.group) >= 0) {
@@ -137,17 +140,26 @@ const LoadDataMachines: React.FC<PropsPage> = props => {
                           eachMachineSettings.factory,
                         ) >= 0
                       ) {
-                        newMachines.push(eachMachineSettings);
+                        newMachines.push({
+                          ...eachMachineSettings,
+                          sequenceMachine: hasMachine[0].option2,
+                        });
                       }
                     } else {
-                      newMachines.push(eachMachineSettings);
+                      newMachines.push({
+                        ...eachMachineSettings,
+                        sequenceMachine: hasMachine[0].option2,
+                      });
                     }
                   }
                 } else if (FactoriesSelected.length > 0) {
                   if (
                     FactoriesSelected.indexOf(eachMachineSettings.factory) >= 0
                   ) {
-                    newMachines.push(eachMachineSettings);
+                    newMachines.push({
+                      ...eachMachineSettings,
+                      sequenceMachine: hasMachine[0].option2,
+                    });
                   }
                 } else {
                   newMachines.push({
