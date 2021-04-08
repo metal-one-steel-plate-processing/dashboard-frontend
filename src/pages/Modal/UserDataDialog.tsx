@@ -1,9 +1,4 @@
-import React, {
-  forwardRef,
-  useState,
-  useImperativeHandle,
-  useRef,
-} from 'react';
+import React, { forwardRef, useState, useImperativeHandle, useRef } from 'react';
 
 import Dialog from '@material-ui/core/Dialog';
 import DialogActions from '@material-ui/core/DialogActions';
@@ -28,10 +23,7 @@ interface UserProps {
   email: string;
 }
 
-const ModalUser: React.ForwardRefRenderFunction<ModalHandles> = (
-  props,
-  ref,
-) => {
+const ModalUser: React.ForwardRefRenderFunction<ModalHandles> = (props, ref) => {
   const [visible, setVisible] = useState(false);
   const [userData, setUserData] = useState({} as UserProps);
   const formRefChangePassword = useRef<HTMLFormElement>(null);
@@ -68,9 +60,7 @@ const ModalUser: React.ForwardRefRenderFunction<ModalHandles> = (
       signOut();
       setVisible(false);
     } catch (error) {
-      toast.error(
-        'Error when changing your password, please check your credentials',
-      );
+      toast.error('Error when changing your password, please check your credentials');
     }
   }
 
@@ -97,35 +87,18 @@ const ModalUser: React.ForwardRefRenderFunction<ModalHandles> = (
           </Typography>
 
           <form ref={formRefChangePassword}>
-            <Grid xs={12}>
-              <TextField
-                autoFocus
-                margin="dense"
-                label="Enter the current password"
-                fullWidth
-                type="password"
-                name="password"
-              />
-            </Grid>
+            <Grid container spacing={1}>
+              <Grid item xs={12}>
+                <TextField autoFocus margin="dense" label="Enter the current password" fullWidth type="password" name="password" />
+              </Grid>
 
-            <Grid xs={12}>
-              <TextField
-                margin="dense"
-                label="Enter the new password"
-                fullWidth
-                name="new_password"
-                type="password"
-              />
-            </Grid>
+              <Grid item xs={12}>
+                <TextField margin="dense" label="Enter the new password" fullWidth name="new_password" type="password" />
+              </Grid>
 
-            <Grid xs={12}>
-              <TextField
-                margin="dense"
-                label="Confirm the new password"
-                name="confirmation_password"
-                type="password"
-                fullWidth
-              />
+              <Grid item xs={12}>
+                <TextField margin="dense" label="Confirm the new password" name="confirmation_password" type="password" fullWidth />
+              </Grid>
             </Grid>
 
             <DialogActions>

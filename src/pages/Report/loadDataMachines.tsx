@@ -15,6 +15,16 @@ import TableCell from '@material-ui/core/TableCell';
 import TableContainer from '@material-ui/core/TableContainer';
 import TableHead from '@material-ui/core/TableHead';
 import TableRow from '@material-ui/core/TableRow';
+import AvatarGroup from '@material-ui/lab/AvatarGroup';
+import BrokenImageIcon from '@material-ui/icons/BrokenImage';
+import Card from '@material-ui/core/Card';
+import CardActionArea from '@material-ui/core/CardActionArea';
+import CardContent from '@material-ui/core/CardContent';
+import CardMedia from '@material-ui/core/CardMedia';
+import Dialog from '@material-ui/core/Dialog';
+import DialogActions from '@material-ui/core/DialogActions';
+import DialogContent from '@material-ui/core/DialogContent';
+import ButtonBase from '@material-ui/core/ButtonBase';
 import { makeStyles } from '@material-ui/core/styles';
 import { eachDayOfInterval, format, endOfWeek, startOfWeek } from 'date-fns';
 import { convertToTimeZone } from 'date-fns-timezone/dist/convertToTimeZone';
@@ -31,6 +41,7 @@ import { faFileCsv } from '@fortawesome/free-solid-svg-icons';
 
 import { toast } from 'react-toastify';
 
+import Avatar from '@material-ui/core/Avatar';
 import { useAuth } from '../../hooks/AuthContext';
 import api from '../../services/api';
 
@@ -51,6 +62,22 @@ const useStyles = makeStyles(theme => ({
   container: {
     maxHeight: 700,
   },
+  small: {
+    width: theme.spacing(3),
+    height: theme.spacing(3),
+  },
+  machineDescription: {
+    display: 'flex',
+    '& > *': {
+      marginLeft: theme.spacing(1),
+    },
+  },
+  rootCard: {
+    maxWidth: 345,
+  },
+  mediaCard: {
+    height: 150,
+  },
 }));
 
 interface DataMachineInterface {
@@ -68,6 +95,7 @@ interface MachineInterface {
   group: string;
   factory: string;
   sequenceMachine: string;
+  file_url?: string;
 }
 
 interface UserSettingsInterface {
@@ -103,12 +131,7 @@ const LoadDataMachinesReport: React.FC = () => {
   const dateNow = new Date();
   const monthNow = dateNow.getMonth();
   const yearNow = dateNow.getFullYear();
-  const {
-    user,
-    FactoriesSelected,
-    GroupsSelected,
-    MachinesSelected,
-  } = useAuth();
+  const { user, FactoriesSelected, GroupsSelected, MachinesSelected } = useAuth();
   const [dateRange, setDateRange] = React.useState<DateRange>({
     startDate: new Date(yearNow, monthNow, startOfWeek(new Date()).getDate()),
     endDate: new Date(yearNow, monthNow, endOfWeek(new Date()).getDate()),
@@ -123,6 +146,38 @@ const LoadDataMachinesReport: React.FC = () => {
 
   const [series, setSeries] = useState<SeriesInterface[]>([]);
   const [seriesExport, setSeriesExport] = useState<SeriesExportInterface[]>([]);
+  const [OpenViewMachineImage, setOpenViewMachineImage] = React.useState(false);
+  const [MachineImage, setMachineImage] = React.useState('');
+
+  const handleClickOpenViewMachineImage = (machineFile: string) => {
+    if (machineFile) {
+      setMachineImage(machineFile);
+      setOpenViewMachineImage(true);
+    }
+  };
+
+  const handleCloseViewMachineImage = () => {
+    setMachineImage('');
+    setOpenViewMachineImage(false);
+  };
+
+  const handleViewMachineDetails = (machineName: string, machineFile: string, factory: string) => {
+    return (
+      <Card className={classes.rootCard}>
+        <CardActionArea>
+          {machineFile && <CardMedia className={classes.mediaCard} image={machineFile} title={machineName} />}
+          <CardContent>
+            <Typography gutterBottom variant="h6" component="h2">
+              {machineName}
+            </Typography>
+            <Typography variant="body2" color="textSecondary" component="p">
+              {factory}
+            </Typography>
+          </CardContent>
+        </CardActionArea>
+      </Card>
+    );
+  };
 
   const toggle = () => setOpen(!open);
 
@@ -156,62 +211,49 @@ const LoadDataMachinesReport: React.FC = () => {
 
       const responseSettings = await api.get('/user-settings');
       const responseMachineSettings = await api.get('/machine-settings');
-      if (
-        responseMachineSettings.data &&
-        responseMachineSettings.data.length > 0
-      ) {
+      if (responseMachineSettings.data && responseMachineSettings.data.length > 0) {
         const newMachines: MachineInterface[] = [];
 
         if (responseSettings.data && responseSettings.data.length > 0) {
-          responseMachineSettings.data.map(
-            (eachMachineSettings: MachineInterface) => {
-              const hasMachine = responseSettings.data.filter(
-                (eachSettingsUsers: UserSettingsInterface) =>
-                  eachSettingsUsers.user_name === user.name &&
-                  eachSettingsUsers.canceled === 'N' &&
-                  eachSettingsUsers.description === eachMachineSettings.name &&
-                  eachSettingsUsers.option1 === 'allow',
-              );
-              if (hasMachine.length > 0) {
-                if (MachinesSelected.length > 0) {
-                  const machineSelected = MachinesSelected.filter(
-                    eachMachineSelected =>
-                      eachMachineSelected.description ===
-                      eachMachineSettings.description,
-                  );
-                  if (machineSelected.length > 0) {
-                    newMachines.push(eachMachineSettings);
-                  }
-                } else if (GroupsSelected.length > 0) {
-                  if (GroupsSelected.indexOf(eachMachineSettings.group) >= 0) {
-                    if (FactoriesSelected.length > 0) {
-                      if (
-                        FactoriesSelected.indexOf(
-                          eachMachineSettings.factory,
-                        ) >= 0
-                      ) {
-                        newMachines.push(eachMachineSettings);
-                      }
-                    } else {
+          responseMachineSettings.data.map((eachMachineSettings: MachineInterface) => {
+            const hasMachine = responseSettings.data.filter(
+              (eachSettingsUsers: UserSettingsInterface) =>
+                eachSettingsUsers.user_name === user.name &&
+                eachSettingsUsers.canceled === 'N' &&
+                eachSettingsUsers.description === eachMachineSettings.name &&
+                eachSettingsUsers.option1 === 'allow',
+            );
+            if (hasMachine.length > 0) {
+              if (MachinesSelected.length > 0) {
+                const machineSelected = MachinesSelected.filter(
+                  eachMachineSelected => eachMachineSelected.description === eachMachineSettings.description,
+                );
+                if (machineSelected.length > 0) {
+                  newMachines.push(eachMachineSettings);
+                }
+              } else if (GroupsSelected.length > 0) {
+                if (GroupsSelected.indexOf(eachMachineSettings.group) >= 0) {
+                  if (FactoriesSelected.length > 0) {
+                    if (FactoriesSelected.indexOf(eachMachineSettings.factory) >= 0) {
                       newMachines.push(eachMachineSettings);
                     }
-                  }
-                } else if (FactoriesSelected.length > 0) {
-                  if (
-                    FactoriesSelected.indexOf(eachMachineSettings.factory) >= 0
-                  ) {
+                  } else {
                     newMachines.push(eachMachineSettings);
                   }
-                } else {
-                  newMachines.push({
-                    ...eachMachineSettings,
-                    sequenceMachine: hasMachine[0].option2,
-                  });
                 }
+              } else if (FactoriesSelected.length > 0) {
+                if (FactoriesSelected.indexOf(eachMachineSettings.factory) >= 0) {
+                  newMachines.push(eachMachineSettings);
+                }
+              } else {
+                newMachines.push({
+                  ...eachMachineSettings,
+                  sequenceMachine: hasMachine[0].option2,
+                });
               }
-              return true;
-            },
-          );
+            }
+            return true;
+          });
           // console.log(newMachines);
           setAllMachines(newMachines);
         }
@@ -234,11 +276,8 @@ const LoadDataMachinesReport: React.FC = () => {
           AllMachines.map(async eachMachine => {
             try {
               const responseMachine = await api.post('/filter-rangeDate', {
-                startDate:
-                  dateRange.startDate &&
-                  format(dateRange.startDate, 'yyyy-MM-dd'),
-                endDate:
-                  dateRange.endDate && format(dateRange.endDate, 'yyyy-MM-dd'),
+                startDate: dateRange.startDate && format(dateRange.startDate, 'yyyy-MM-dd'),
+                endDate: dateRange.endDate && format(dateRange.endDate, 'yyyy-MM-dd'),
                 machine: eachMachine.name,
               });
 
@@ -332,20 +371,14 @@ const LoadDataMachinesReport: React.FC = () => {
               // console.log(dataMachine);
 
               responseMachine.data
-                .sort(
-                  (
-                    dataMachine1: DataMachineInterface,
-                    dataMachine2: DataMachineInterface,
-                  ) => (dataMachine1.datatime > dataMachine2.datatime ? 1 : -1),
+                .sort((dataMachine1: DataMachineInterface, dataMachine2: DataMachineInterface) =>
+                  dataMachine1.datatime > dataMachine2.datatime ? 1 : -1,
                 )
                 // eslint-disable-next-line no-loop-func
                 .map((dataMachine: DataMachineInterface) => {
                   newDataMachine.push({
                     ...dataMachine,
-                    datatime: convertToTimeZone(
-                      new Date(dataMachine.datatime),
-                      { timeZone },
-                    ),
+                    datatime: convertToTimeZone(new Date(dataMachine.datatime), { timeZone }),
                     machine: eachMachine.description,
                   });
 
@@ -414,9 +447,7 @@ const LoadDataMachinesReport: React.FC = () => {
         DataMachine &&
           DataMachine.filter(
             (eachDataMachine: DataMachineInterface) =>
-              eachDataMachine.datatime.getDate() ===
-                eachDaySelected.getDate() &&
-              eachMachine.description === eachDataMachine.machine,
+              eachDataMachine.datatime.getDate() === eachDaySelected.getDate() && eachMachine.description === eachDataMachine.machine,
           ).map((eachDataMachine: DataMachineInterface) => {
             if (eachDataMachine.status && eachDataMachine.status === '0190') {
               operating += 2;
@@ -475,10 +506,7 @@ const LoadDataMachinesReport: React.FC = () => {
           },
         ); */
         // console.log(eachDatamachine);
-        efficiency =
-          operating !== 0 && connected !== 0
-            ? (operating / connected) * 100
-            : 0;
+        efficiency = operating !== 0 && connected !== 0 ? (operating / connected) * 100 : 0;
         /* console.log(operating);
         console.log(connected);
         console.log(efficiency); */
@@ -521,10 +549,7 @@ const LoadDataMachinesReport: React.FC = () => {
 
     AllMachines.sort((eachMachine, eachMachine2) => {
       if (eachMachine.sequenceMachine && eachMachine2.sequenceMachine) {
-        return parseFloat(eachMachine.sequenceMachine) >
-          parseFloat(eachMachine2.sequenceMachine)
-          ? 1
-          : -1;
+        return parseFloat(eachMachine.sequenceMachine) > parseFloat(eachMachine2.sequenceMachine) ? 1 : -1;
       }
       return 0;
     }).map(eachMachine => {
@@ -535,8 +560,7 @@ const LoadDataMachinesReport: React.FC = () => {
           const dataSeriesMachine = series
             ? series.filter(
                 (eachSeries: SeriesInterface) =>
-                  eachSeries.machineId === eachMachine.id &&
-                  eachSeries.eachDay === eachDaySelected.getDate(),
+                  eachSeries.machineId === eachMachine.id && eachSeries.eachDay === eachDaySelected.getDate(),
               )
             : [];
 
@@ -589,17 +613,11 @@ const LoadDataMachinesReport: React.FC = () => {
             ...eachDataSeriesExport,
             Machine: `${eachMachine.factory} - ${eachMachine.description}`,
             [`${format(eachDaySelected, "MMMM d',' yyyy")} Connected`]:
-              dataSeriesMachine && dataSeriesMachine.length > 0
-                ? dataSeriesMachine[0].connected
-                : '-',
+              dataSeriesMachine && dataSeriesMachine.length > 0 ? dataSeriesMachine[0].connected : '-',
             [`${format(eachDaySelected, "MMMM d',' yyyy")} Operating`]:
-              dataSeriesMachine && dataSeriesMachine.length > 0
-                ? dataSeriesMachine[0].operating
-                : '-',
+              dataSeriesMachine && dataSeriesMachine.length > 0 ? dataSeriesMachine[0].operating : '-',
             [`${format(eachDaySelected, "MMMM d',' yyyy")} Efficiency`]:
-              dataSeriesMachine && dataSeriesMachine.length > 0
-                ? dataSeriesMachine[0].efficiency?.toFixed(2)
-                : '-',
+              dataSeriesMachine && dataSeriesMachine.length > 0 ? dataSeriesMachine[0].efficiency?.toFixed(2) : '-',
           };
 
           return true;
@@ -620,6 +638,17 @@ const LoadDataMachinesReport: React.FC = () => {
         <LinearProgress className={classes.progress} color="secondary" />
         <Typography align="center">loading machine data</Typography>
       </Backdrop>
+
+      <Dialog open={OpenViewMachineImage} onClose={handleCloseViewMachineImage} fullWidth maxWidth="lg">
+        <DialogContent>
+          <img src={MachineImage} alt="Machine" width="100%" />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseViewMachineImage} color="primary" autoFocus>
+            Close
+          </Button>
+        </DialogActions>
+      </Dialog>
       <Grid container spacing={2} justify="center" alignItems="center">
         <Grid item xs={2}>
           <Tooltip title="Return to Dashboard">
@@ -635,12 +664,7 @@ const LoadDataMachinesReport: React.FC = () => {
           <Typography align="center" variant="h4">
             {'From '}
             <Chip
-              label={
-                <Typography variant="h5">
-                  {dateRange.startDate &&
-                    format(dateRange.startDate, "MMMM d',' yyyy")}
-                </Typography>
-              }
+              label={<Typography variant="h5">{dateRange.startDate && format(dateRange.startDate, "MMMM d',' yyyy")}</Typography>}
               component="a"
               variant="outlined"
               color="secondary"
@@ -648,12 +672,7 @@ const LoadDataMachinesReport: React.FC = () => {
             />
             {' To '}
             <Chip
-              label={
-                <Typography variant="h5">
-                  {dateRange.endDate &&
-                    format(dateRange.endDate, "MMMM d',' yyyy")}
-                </Typography>
-              }
+              label={<Typography variant="h5">{dateRange.endDate && format(dateRange.endDate, "MMMM d',' yyyy")}</Typography>}
               component="a"
               variant="outlined"
               color="secondary"
@@ -692,16 +711,8 @@ const LoadDataMachinesReport: React.FC = () => {
               open={open}
               toggle={toggle}
               initialDateRange={{
-                startDate: new Date(
-                  yearNow,
-                  monthNow,
-                  startOfWeek(new Date()).getDate(),
-                ),
-                endDate: new Date(
-                  yearNow,
-                  monthNow,
-                  endOfWeek(new Date()).getDate(),
-                ),
+                startDate: new Date(yearNow, monthNow, startOfWeek(new Date()).getDate()),
+                endDate: new Date(yearNow, monthNow, endOfWeek(new Date()).getDate()),
               }}
               onChange={range => setDateRange(range)}
             />
@@ -712,20 +723,13 @@ const LoadDataMachinesReport: React.FC = () => {
         <Grid item xs={3} lg={2} style={{ flex: 'inherit' }}>
           <CSVLink
             style={{ textDecoration: 'none' }}
-            filename={`MachineEfficiency_${
-              dateRange.startDate && format(dateRange.startDate, 'MMMM_d_yyyy')
-            }_to_${
+            filename={`MachineEfficiency_${dateRange.startDate && format(dateRange.startDate, 'MMMM_d_yyyy')}_to_${
               dateRange.endDate && format(dateRange.endDate, 'MMMM_d_yyyy')
             }.csv`}
             data={seriesExport}
             separator=";"
           >
-            <Button
-              variant="outlined"
-              color="default"
-              size="small"
-              startIcon={<FontAwesomeIcon icon={faFileCsv} size="lg" />}
-            >
+            <Button variant="outlined" color="default" size="small" startIcon={<FontAwesomeIcon icon={faFileCsv} size="lg" />}>
               Export CSV
             </Button>
           </CSVLink>
@@ -758,11 +762,7 @@ const LoadDataMachinesReport: React.FC = () => {
                       }}
                     >
                       <TableRow>
-                        <TableCell
-                          align="center"
-                          colSpan={3}
-                          style={{ padding: '1px' }}
-                        >
+                        <TableCell align="center" colSpan={3} style={{ padding: '1px' }}>
                           {`${format(eachDaySelected, "EEEE d'/'MMMM")}`}
                         </TableCell>
                       </TableRow>
@@ -809,14 +809,8 @@ const LoadDataMachinesReport: React.FC = () => {
               </TableHead>
               <TableBody>
                 {AllMachines.sort((eachMachine, eachMachine2) => {
-                  if (
-                    eachMachine.sequenceMachine &&
-                    eachMachine2.sequenceMachine
-                  ) {
-                    return parseFloat(eachMachine.sequenceMachine) >
-                      parseFloat(eachMachine2.sequenceMachine)
-                      ? 1
-                      : -1;
+                  if (eachMachine.sequenceMachine && eachMachine2.sequenceMachine) {
+                    return parseFloat(eachMachine.sequenceMachine) > parseFloat(eachMachine2.sequenceMachine) ? 1 : -1;
                   }
                   return 0;
                 }).map(eachMachine => {
@@ -829,31 +823,36 @@ const LoadDataMachinesReport: React.FC = () => {
                           minWidth: '200px',
                         }}
                       >
-                        <Box display="flex" alignItems="center">
-                          <Box display="flex">
-                            <img
-                              src={
-                                eachMachine.factory === 'IMOP'
-                                  ? TagIMOP
-                                  : TagMOSB
-                              }
-                              alt={eachMachine.factory}
-                              height="16"
-                            />
-                          </Box>
-                          <Box display="flex" ml={1}>
-                            {` ${eachMachine.factory} - ${eachMachine.description}`}
-                          </Box>
-                        </Box>
+                        <div className={classes.machineDescription}>
+                          <Tooltip
+                            title={handleViewMachineDetails(eachMachine.description, eachMachine.file_url || '', eachMachine.factory)}
+                          >
+                            <AvatarGroup>
+                              <Avatar
+                                alt={eachMachine.factory}
+                                src={eachMachine.factory === 'IMOP' ? TagIMOP : TagMOSB}
+                                className={classes.small}
+                              />
+                              <Avatar
+                                alt={eachMachine.name}
+                                src={eachMachine.file_url}
+                                className={classes.small}
+                                component={ButtonBase}
+                                onClick={() => handleClickOpenViewMachineImage(eachMachine.file_url || '')}
+                              >
+                                <BrokenImageIcon />
+                              </Avatar>
+                            </AvatarGroup>
+                          </Tooltip>
+                          <Typography variant="body2">{`${eachMachine.factory} - ${eachMachine.description}`}</Typography>
+                        </div>
                       </TableCell>
                       {eachDay &&
                         eachDay.map(eachDaySelected => {
                           const dataSeriesMachine = series
                             ? series.filter(
                                 (eachSeries: SeriesInterface) =>
-                                  eachSeries.machineId === eachMachine.id &&
-                                  eachSeries.eachDay ===
-                                    eachDaySelected.getDate(),
+                                  eachSeries.machineId === eachMachine.id && eachSeries.eachDay === eachDaySelected.getDate(),
                               )
                             : [];
                           /* console.log(eachMachine.id);
@@ -872,10 +871,7 @@ const LoadDataMachinesReport: React.FC = () => {
                                   maxWidth: '72px',
                                 }}
                               >
-                                {dataSeriesMachine &&
-                                dataSeriesMachine.length > 0
-                                  ? dataSeriesMachine[0].connected
-                                  : '-'}
+                                {dataSeriesMachine && dataSeriesMachine.length > 0 ? dataSeriesMachine[0].connected : '-'}
                               </TableCell>
                               <TableCell
                                 align="center"
@@ -887,16 +883,12 @@ const LoadDataMachinesReport: React.FC = () => {
                                   maxWidth: '68px',
                                 }}
                               >
-                                {dataSeriesMachine &&
-                                dataSeriesMachine.length > 0
-                                  ? dataSeriesMachine[0].operating
-                                  : '-'}
+                                {dataSeriesMachine && dataSeriesMachine.length > 0 ? dataSeriesMachine[0].operating : '-'}
                               </TableCell>
                               <TableCell
                                 align="center"
                                 className={
-                                  dataSeriesMachine.length > 0 &&
-                                  dataSeriesMachine[0].efficiency_style !== ''
+                                  dataSeriesMachine.length > 0 && dataSeriesMachine[0].efficiency_style !== ''
                                     ? dataSeriesMachine[0].efficiency_style
                                     : ''
                                 }
@@ -909,11 +901,8 @@ const LoadDataMachinesReport: React.FC = () => {
                                   maxWidth: '70px',
                                 }}
                               >
-                                {dataSeriesMachine &&
-                                dataSeriesMachine.length > 0
-                                  ? `${dataSeriesMachine[0].efficiency?.toFixed(
-                                      2,
-                                    )}%`
+                                {dataSeriesMachine && dataSeriesMachine.length > 0
+                                  ? `${dataSeriesMachine[0].efficiency?.toFixed(2)}%`
                                   : '-'}
                               </TableCell>
                             </>

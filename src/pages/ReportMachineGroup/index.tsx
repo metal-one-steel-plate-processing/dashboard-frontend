@@ -16,7 +16,7 @@ import ExitToAppIcon from '@material-ui/icons/ExitToApp';
 import ModalUser, { ModalHandles } from '../Modal/UserDataDialog';
 import { useAuth } from '../../hooks/AuthContext';
 import MachineSettings from '../Dashboard/machineSettings';
-import MachineStatus from './statusMachine';
+import LoadDataMachines from './loadDataMachines';
 
 function Copyright() {
   return (
@@ -56,59 +56,56 @@ const useStyles = makeStyles(theme => ({
   },
 }));
 
-const Appointments: React.FC = () => {
+const ReportMachineGroup: React.FC = () => {
   const classes = useStyles();
   const dialogRef = useRef<ModalHandles>(null);
-
   const { signOut, user } = useAuth();
-
   const [OpenDrawer, setOpenDrawer] = useState(false);
 
   function handleOpenModalUser(id: string) {
     dialogRef.current?.openModal(id);
   }
   return (
-    <>
-      <div className={classes.containerDashBoard}>
-        <AppBar position="relative">
-          <Toolbar style={{ justifyContent: 'space-between' }}>
-            <IconButton edge="start" className={classes.menuButton} onClick={() => setOpenDrawer(true)} color="inherit" aria-label="menu">
-              <MenuIcon />
-            </IconButton>
-            <Typography variant="h6" className={classes.title} color="inherit" noWrap>
-              MOSB
-            </Typography>
+    <div className={classes.containerDashBoard}>
+      <AppBar position="relative">
+        <Toolbar style={{ justifyContent: 'space-between' }}>
+          <IconButton edge="start" className={classes.menuButton} onClick={() => setOpenDrawer(true)} color="inherit" aria-label="menu">
+            <MenuIcon />
+          </IconButton>
+          <Typography variant="h6" className={classes.title} color="inherit" noWrap>
+            MOSB
+          </Typography>
 
-            <Grid onClick={() => handleOpenModalUser(user.id)}>
-              <div className={classes.avatar}>
-                <Avatar alt={user.name} src="/static/images/avatar/1.jpg" />
-              </div>
-            </Grid>
-
-            <Typography component="h6" color="inherit">
-              Welcome,
-              {user.name}
-              <IconButton color="inherit" onClick={signOut}>
-                <ExitToAppIcon />
-              </IconButton>
-            </Typography>
-          </Toolbar>
-        </AppBar>
-        <Container maxWidth="xl">
-          <Grid container>
-            <MachineStatus />
+          <Grid onClick={() => handleOpenModalUser(user.id)}>
+            <div className={classes.avatar}>
+              <Avatar alt={user.name} src="/static/images/avatar/1.jpg" />
+            </div>
           </Grid>
-        </Container>
-        <Drawer anchor="top" open={OpenDrawer} onClose={() => setOpenDrawer(false)} className={classes.drawer}>
-          <MachineSettings />
-        </Drawer>
-        <footer className={classes.footer}>
-          <Copyright />
-        </footer>
-      </div>
+
+          <Typography component="h6" color="inherit">
+            Welcome,
+            {user.name}
+            <IconButton color="inherit" onClick={signOut}>
+              <ExitToAppIcon />
+            </IconButton>
+          </Typography>
+        </Toolbar>
+      </AppBar>
+
+      <Container maxWidth="xl">
+        <Grid container>
+          <LoadDataMachines />
+        </Grid>
+      </Container>
+      <Drawer anchor="top" open={OpenDrawer} onClose={() => setOpenDrawer(false)} className={classes.drawer}>
+        <MachineSettings />
+      </Drawer>
+      <footer className={classes.footer}>
+        <Copyright />
+      </footer>
       <ModalUser ref={dialogRef} />
-    </>
+    </div>
   );
 };
 
-export default Appointments;
+export default ReportMachineGroup;

@@ -41,16 +41,12 @@ interface FilterMachines {
   factory: string;
 }
 
-export const AuthContext = createContext<AuthContextData>(
-  {} as AuthContextData,
-);
+export const AuthContext = createContext<AuthContextData>({} as AuthContextData);
 
 export const AuthProvider: React.FC = ({ children }) => {
   const [FactoriesSelected, setFactoriesSelected] = useState<string[]>([]);
   const [GroupsSelected, setGroupsSelected] = useState<string[]>([]);
-  const [MachinesSelected, setMachinesSelected] = useState<FilterMachines[]>(
-    [],
-  );
+  const [MachinesSelected, setMachinesSelected] = useState<FilterMachines[]>([]);
   const [data, setData] = useState<AuthState>(() => {
     const token = localStorage.getItem('@Dashboard:token');
     const user = localStorage.getItem('@Dashboard:user');

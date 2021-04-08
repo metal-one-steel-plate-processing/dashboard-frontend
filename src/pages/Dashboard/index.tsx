@@ -89,21 +89,10 @@ const Dashboard: React.FC = () => {
       <div className={classes.containerDashBoard}>
         <AppBar position="relative">
           <Toolbar style={{ justifyContent: 'space-between' }}>
-            <IconButton
-              edge="start"
-              className={classes.menuButton}
-              onClick={() => setOpenDrawer(true)}
-              color="inherit"
-              aria-label="menu"
-            >
+            <IconButton edge="start" className={classes.menuButton} onClick={() => setOpenDrawer(true)} color="inherit" aria-label="menu">
               <MenuIcon />
             </IconButton>
-            <Typography
-              variant="h6"
-              className={classes.title}
-              color="inherit"
-              noWrap
-            >
+            <Typography variant="h6" className={classes.title} color="inherit" noWrap>
               MOSB
             </Typography>
 
@@ -125,12 +114,7 @@ const Dashboard: React.FC = () => {
         <Container maxWidth="xl">
           <Grid container justify="center">
             <Grid item xs={12}>
-              <Typography
-                component="h1"
-                variant="h2"
-                align="center"
-                color="textPrimary"
-              >
+              <Typography component="h1" variant="h2" align="center" color="textPrimary">
                 Machine Efficiency
               </Typography>
             </Grid>
@@ -143,8 +127,7 @@ const Dashboard: React.FC = () => {
                     value={convertToTimeZone(new Date(DateNow), { timeZone })}
                     format="MMMM d, yyyy"
                     onChange={
-                      date =>
-                        date && setDateNow(format(new Date(date), 'yyyy-MM-dd'))
+                      date => date && setDateNow(format(new Date(date), 'yyyy-MM-dd'))
                       /* console.log(date),
                         console.log(date),
                         console.log(DateNow) */
@@ -156,12 +139,7 @@ const Dashboard: React.FC = () => {
             </Grid>
             <Grid item xs={3} sm={2}>
               <Tooltip title="Report">
-                <Typography
-                  align="left"
-                  gutterBottom
-                  component={LinkRD}
-                  to="/report"
-                >
+                <Typography align="left" gutterBottom component={LinkRD} to="/report">
                   <IconButton>
                     <TimelineIcon style={{ color: '#000' }} />
                   </IconButton>
@@ -202,12 +180,7 @@ const Dashboard: React.FC = () => {
             <Grid item xs={12} />
           </Grid>
         </Container>
-        <Drawer
-          anchor="top"
-          open={OpenDrawer}
-          onClose={() => setOpenDrawer(false)}
-          className={classes.drawer}
-        >
+        <Drawer anchor="top" open={OpenDrawer} onClose={() => setOpenDrawer(false)} className={classes.drawer}>
           <MachineSettings />
         </Drawer>
         <footer className={classes.footer}>

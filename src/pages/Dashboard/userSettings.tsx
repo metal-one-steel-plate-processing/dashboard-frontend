@@ -1,7 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { makeStyles } from '@material-ui/core/styles';
-import Card from '@material-ui/core/Card';
-import CardContent from '@material-ui/core/CardContent';
 import Table from '@material-ui/core/Table';
 import TableBody from '@material-ui/core/TableBody';
 import TableCell from '@material-ui/core/TableCell';
@@ -34,6 +32,9 @@ const useStyles = makeStyles(theme => ({
   progress: {
     width: '90%',
     marginBottom: 10,
+  },
+  container: {
+    maxHeight: 440,
   },
 }));
 
@@ -76,55 +77,47 @@ const UserSettings: React.FC = () => {
         <Typography align="center">loading users</Typography>
       </Backdrop>
       <EditUser userEdit={UserEdit} ref={dialogRef} loadUsers={loadUsers} />
-      <Card>
-        <CardContent>
-          <TableContainer>
-            <Table size="small">
-              <TableHead>
-                <TableRow>
-                  <TableCell />
-                  <TableCell>ID</TableCell>
-                  <TableCell>Name</TableCell>
-                  <TableCell>Email</TableCell>
-                  <TableCell>Status</TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {AllUsers &&
-                  AllUsers.sort((eachUser, eachUser2) =>
-                    eachUser.name > eachUser2.name ? 1 : -1,
-                  ).map((eachUser, index) => (
-                    <TableRow
-                      key={index.toString()}
-                      className="eachLineTable"
-                      hover
-                      onClick={() => {
-                        setUserEdit({
-                          id: eachUser.id,
-                          name: eachUser.name,
-                          email: eachUser.email,
-                          canceled: eachUser.canceled,
-                        });
+      <TableContainer className={classes.container}>
+        <Table stickyHeader size="small">
+          <TableHead>
+            <TableRow>
+              <TableCell />
+              <TableCell>ID</TableCell>
+              <TableCell>Name</TableCell>
+              <TableCell>Email</TableCell>
+              <TableCell>Status</TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {AllUsers &&
+              AllUsers.sort((eachUser, eachUser2) => (eachUser.name > eachUser2.name ? 1 : -1)).map((eachUser, index) => (
+                <TableRow
+                  key={index.toString()}
+                  className="eachLineTable"
+                  hover
+                  onClick={() => {
+                    setUserEdit({
+                      id: eachUser.id,
+                      name: eachUser.name,
+                      email: eachUser.email,
+                      canceled: eachUser.canceled,
+                    });
 
-                        return true;
-                      }}
-                    >
-                      <TableCell>
-                        <ForwardIcon color="secondary" />
-                      </TableCell>
-                      <TableCell>{eachUser.id}</TableCell>
-                      <TableCell>{eachUser.name}</TableCell>
-                      <TableCell>{eachUser.email}</TableCell>
-                      <TableCell>
-                        {eachUser.canceled === 'Y' ? 'yes' : 'no'}
-                      </TableCell>
-                    </TableRow>
-                  ))}
-              </TableBody>
-            </Table>
-          </TableContainer>
-        </CardContent>
-      </Card>
+                    return true;
+                  }}
+                >
+                  <TableCell>
+                    <ForwardIcon color="secondary" />
+                  </TableCell>
+                  <TableCell>{eachUser.id}</TableCell>
+                  <TableCell>{eachUser.name}</TableCell>
+                  <TableCell>{eachUser.email}</TableCell>
+                  <TableCell>{eachUser.canceled === 'Y' ? 'yes' : 'no'}</TableCell>
+                </TableRow>
+              ))}
+          </TableBody>
+        </Table>
+      </TableContainer>
     </>
   );
 };

@@ -1,12 +1,7 @@
 /* eslint-disable camelcase */
 /* eslint-disable no-unused-expressions */
 /* eslint-disable react/destructuring-assignment */
-import React, {
-  forwardRef,
-  useState,
-  useImperativeHandle,
-  useRef,
-} from 'react';
+import React, { forwardRef, useState, useImperativeHandle, useRef } from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 import Button from '@material-ui/core/Button';
 import Dialog from '@material-ui/core/Dialog';
@@ -45,13 +40,7 @@ function TabPanel(props: TabPanelProps) {
   const { children, value, index, ...other } = props;
 
   return (
-    <div
-      role="tabpanel"
-      hidden={value !== index}
-      id={`simple-tabpanel-${index}`}
-      aria-labelledby={`simple-tab-${index}`}
-      {...other}
-    >
+    <div role="tabpanel" hidden={value !== index} id={`simple-tabpanel-${index}`} aria-labelledby={`simple-tab-${index}`} {...other}>
       {value === index && (
         <Box p={3}>
           <Typography>{children}</Typography>
@@ -104,10 +93,7 @@ interface SettingsInterface {
   type?: string;
 }
 
-const UserEdit: React.ForwardRefRenderFunction<DialogHandles, PropsPage> = (
-  props,
-  ref,
-) => {
+const UserEdit: React.ForwardRefRenderFunction<DialogHandles, PropsPage> = (props, ref) => {
   const classes = useStyles();
   const [loading, setLoading] = useState(false);
   const [open, setOpen] = useState(false);
@@ -158,31 +144,21 @@ const UserEdit: React.ForwardRefRenderFunction<DialogHandles, PropsPage> = (
     ];
     const responseMachine = await api.get('/machine-settings');
     if (responseMachine.data && responseMachine.data.length > 0) {
-      responseMachine.data.map(
-        (eachMachine: {
-          name: string;
-          description: string;
-          factory: string;
-        }) => {
-          return newSettings.push({
-            name: eachMachine.name,
-            description: `${eachMachine.name} ${eachMachine.description} - ( ${eachMachine.factory} )`,
-            values: ['allow', 'deny'],
-            type: 'machine',
-          });
-        },
-      );
+      responseMachine.data.map((eachMachine: { name: string; description: string; factory: string }) => {
+        return newSettings.push({
+          name: eachMachine.name,
+          description: `${eachMachine.name} ${eachMachine.description} - ( ${eachMachine.factory} )`,
+          values: ['allow', 'deny'],
+          type: 'machine',
+        });
+      });
     }
     const responseSettings = await api.get('/user-settings');
     if (responseSettings.data && responseSettings.data.length > 0) {
       setAllSettings(
         newSettings.map(eachNewSettings => {
           const hasSettings = responseSettings.data.filter(
-            (eachSettings: {
-              description: string;
-              user_id: string;
-              canceled: string;
-            }) =>
+            (eachSettings: { description: string; user_id: string; canceled: string }) =>
               eachSettings.description === eachNewSettings.name &&
               eachSettings.user_id === props.userEdit?.id &&
               eachSettings.canceled === 'N',
@@ -211,9 +187,7 @@ const UserEdit: React.ForwardRefRenderFunction<DialogHandles, PropsPage> = (
 
   async function handleSaveUser() {
     try {
-      const lineTables = formEditUserRef.current?.getElementsByClassName(
-        'eachLineTableEditUser',
-      );
+      const lineTables = formEditUserRef.current?.getElementsByClassName('eachLineTableEditUser');
       const settingsUsers: string | any[] = [];
       setLoading(true);
 
@@ -223,10 +197,8 @@ const UserEdit: React.ForwardRefRenderFunction<DialogHandles, PropsPage> = (
           if (dataLines[0].innerHTML) {
             settingsUsers.push({
               description: dataLines[0].innerHTML,
-              option1: (dataLines[2].children[0].children[0].children[0]
-                .children[0] as HTMLInputElement).value,
-              option2: (dataLines[3].children[0].children[0]
-                .children[0] as HTMLInputElement).value,
+              option1: (dataLines[2].children[0].children[0].children[0].children[0] as HTMLInputElement).value,
+              option2: (dataLines[3].children[0].children[0].children[0] as HTMLInputElement).value,
             });
           }
         }
@@ -270,18 +242,10 @@ const UserEdit: React.ForwardRefRenderFunction<DialogHandles, PropsPage> = (
           <form ref={formEditUserRef}>
             <Grid container spacing={2}>
               <Grid item xs={5}>
-                <TextField
-                  fullWidth
-                  label="Name"
-                  value={props.userEdit?.name}
-                />
+                <TextField fullWidth label="Name" value={props.userEdit?.name} />
               </Grid>
               <Grid item xs={7}>
-                <TextField
-                  fullWidth
-                  label="Email"
-                  value={props.userEdit?.email}
-                />
+                <TextField fullWidth label="Email" value={props.userEdit?.email} />
               </Grid>
               {/* <Grid item xs={1}>
                 <Autocomplete
@@ -318,24 +282,13 @@ const UserEdit: React.ForwardRefRenderFunction<DialogHandles, PropsPage> = (
                   <TableBody>
                     {AllSettings &&
                       AllSettings.sort((eachSettings, eachSettings2) => {
-                        if (
-                          eachSettings.defaultValue2 &&
-                          eachSettings2.defaultValue2
-                        ) {
-                          return eachSettings.defaultValue2 >
-                            eachSettings2.defaultValue2
-                            ? 1
-                            : -1;
+                        if (eachSettings.defaultValue2 && eachSettings2.defaultValue2) {
+                          return eachSettings.defaultValue2 > eachSettings2.defaultValue2 ? 1 : -1;
                         }
                         return 0;
                       }).map((eachSettings, index) => (
-                        <TableRow
-                          key={index.toString()}
-                          className="eachLineTableEditUser"
-                        >
-                          <TableCell style={{ display: 'none' }}>
-                            {`${eachSettings.name}`}
-                          </TableCell>
+                        <TableRow key={index.toString()} className="eachLineTableEditUser">
+                          <TableCell style={{ display: 'none' }}>{`${eachSettings.name}`}</TableCell>
                           <TableCell>{`${eachSettings.description}`}</TableCell>
                           <TableCell>
                             <Autocomplete
@@ -355,19 +308,10 @@ const UserEdit: React.ForwardRefRenderFunction<DialogHandles, PropsPage> = (
                             />
                           </TableCell>
                           <TableCell>
-                            {eachSettings.type &&
-                            eachSettings.type === 'machine' ? (
-                              <TextField
-                                defaultValue={eachSettings.defaultValue2}
-                                name="sequence"
-                                type="number"
-                              />
+                            {eachSettings.type && eachSettings.type === 'machine' ? (
+                              <TextField defaultValue={eachSettings.defaultValue2} name="sequence" type="number" />
                             ) : (
-                              <TextField
-                                disabled
-                                name="sequence"
-                                type="number"
-                              />
+                              <TextField disabled name="sequence" type="number" />
                             )}
                           </TableCell>
                         </TableRow>
@@ -382,11 +326,7 @@ const UserEdit: React.ForwardRefRenderFunction<DialogHandles, PropsPage> = (
           <Button onClick={handleClose} variant="outlined" color="primary">
             Cancel
           </Button>
-          <Button
-            onClick={() => handleSaveUser()}
-            variant="outlined"
-            color="secondary"
-          >
+          <Button onClick={() => handleSaveUser()} variant="outlined" color="secondary">
             Save
           </Button>
         </DialogActions>

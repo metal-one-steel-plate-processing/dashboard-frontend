@@ -72,21 +72,10 @@ const Report: React.FC = () => {
       <div className={classes.containerDashBoard}>
         <AppBar position="relative">
           <Toolbar style={{ justifyContent: 'space-between' }}>
-            <IconButton
-              edge="start"
-              className={classes.menuButton}
-              onClick={() => setOpenDrawer(true)}
-              color="inherit"
-              aria-label="menu"
-            >
+            <IconButton edge="start" className={classes.menuButton} onClick={() => setOpenDrawer(true)} color="inherit" aria-label="menu">
               <MenuIcon />
             </IconButton>
-            <Typography
-              variant="h6"
-              className={classes.title}
-              color="inherit"
-              noWrap
-            >
+            <Typography variant="h6" className={classes.title} color="inherit" noWrap>
               MOSB
             </Typography>
 
@@ -110,12 +99,7 @@ const Report: React.FC = () => {
             <LoadDataMachines />
           </Grid>
         </Container>
-        <Drawer
-          anchor="top"
-          open={OpenDrawer}
-          onClose={() => setOpenDrawer(false)}
-          className={classes.drawer}
-        >
+        <Drawer anchor="top" open={OpenDrawer} onClose={() => setOpenDrawer(false)} className={classes.drawer}>
           <MachineSettings />
         </Drawer>
         <footer className={classes.footer}>

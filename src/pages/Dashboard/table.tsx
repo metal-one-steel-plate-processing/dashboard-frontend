@@ -47,26 +47,15 @@ const DashboardTable: React.FC<PropsPage> = props => {
       </TableHead>
       <TableBody>
         {props.dataMahchines &&
-          props.dataMahchines.map(
-            (
-              row: {
-                id: string;
-                factory: string;
-                machine: string;
-                datatime: Date;
-                status: string;
-              },
-              index,
-            ) => (
-              <TableRow key={`${row.id}`}>
-                <TableCell>{index}</TableCell>
-                <TableCell>{row.factory}</TableCell>
-                <TableCell>{row.machine}</TableCell>
-                <TableCell>{handleFormatDate(row.datatime)}</TableCell>
-                <TableCell>{row.status}</TableCell>
-              </TableRow>
-            ),
-          )}
+          props.dataMahchines.map((row: { id: string; factory: string; machine: string; datatime: Date; status: string }, index) => (
+            <TableRow key={`${row.id}`}>
+              <TableCell>{index}</TableCell>
+              <TableCell>{row.factory}</TableCell>
+              <TableCell>{row.machine}</TableCell>
+              <TableCell>{handleFormatDate(row.datatime)}</TableCell>
+              <TableCell>{row.status}</TableCell>
+            </TableRow>
+          ))}
       </TableBody>
     </Table>
   );

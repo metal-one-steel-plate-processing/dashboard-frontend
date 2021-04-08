@@ -31,63 +31,30 @@ const StatusMachines: React.FC = () => {
           <Box mt={isLarge ? 1 : 2}>
             <Grid container spacing={1}>
               <Grid item xs key="disabled">
-                <Box
-                  bgcolor="text.disabled"
-                  color="background.paper"
-                  pl={1}
-                  component={Paper}
-                >
+                <Box bgcolor="text.disabled" color="background.paper" pl={1} component={Paper}>
                   <Typography noWrap variant={isLarge ? 'caption' : 'h6'}>
                     Off
                   </Typography>
                 </Box>
               </Grid>
               <Grid item xs key="warning">
-                <Box
-                  bgcolor="warning.main"
-                  color="warning.contrastText"
-                  pl={1}
-                  component={Paper}
-                >
-                  <Typography variant={isLarge ? 'caption' : 'h6'}>
-                    Setup
-                  </Typography>
+                <Box bgcolor="warning.main" color="warning.contrastText" pl={1} component={Paper}>
+                  <Typography variant={isLarge ? 'caption' : 'h6'}>Setup</Typography>
                 </Box>
               </Grid>
               <Grid item xs key="success">
-                <Box
-                  bgcolor="success.main"
-                  color="success.contrastText"
-                  pl={1}
-                  component={Paper}
-                >
-                  <Typography variant={isLarge ? 'caption' : 'h6'}>
-                    Production
-                  </Typography>
+                <Box bgcolor="success.main" color="success.contrastText" pl={1} component={Paper}>
+                  <Typography variant={isLarge ? 'caption' : 'h6'}>Production</Typography>
                 </Box>
               </Grid>
               <Grid item xs key="info">
-                <Box
-                  bgcolor="info.main"
-                  color="info.contrastText"
-                  pl={1}
-                  component={Paper}
-                >
-                  <Typography variant={isLarge ? 'caption' : 'h6'}>
-                    Rework
-                  </Typography>
+                <Box bgcolor="info.main" color="info.contrastText" pl={1} component={Paper}>
+                  <Typography variant={isLarge ? 'caption' : 'h6'}>Rework</Typography>
                 </Box>
               </Grid>
               <Grid item xs key="error">
-                <Box
-                  bgcolor="error.main"
-                  color="error.contrastText"
-                  pl={1}
-                  component={Paper}
-                >
-                  <Typography variant={isLarge ? 'caption' : 'h6'}>
-                    Stop
-                  </Typography>
+                <Box bgcolor="error.main" color="error.contrastText" pl={1} component={Paper}>
+                  <Typography variant={isLarge ? 'caption' : 'h6'}>Stop</Typography>
                 </Box>
               </Grid>
             </Grid>

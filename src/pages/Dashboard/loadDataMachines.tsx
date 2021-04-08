@@ -40,6 +40,7 @@ interface MachineInterface {
   group: string;
   factory: string;
   sequenceMachine: string;
+  file_url: string;
 }
 
 interface PropsPage {
@@ -77,16 +78,9 @@ const LoadDataMachines: React.FC<PropsPage> = props => {
   const [AllMachines, setAllMachines] = useState<MachineInterface[]>([]);
   const [seconds, setSeconds] = useState(new Date().getTime());
   const [lastSeconds, setLastSeconds] = useState(new Date().getTime());
-  const {
-    user,
-    FactoriesSelected,
-    GroupsSelected,
-    MachinesSelected,
-  } = useAuth();
+  const { user, FactoriesSelected, GroupsSelected, MachinesSelected } = useAuth();
 
-  const [DataMachine, setDataMachine] = useState<DataMachineInterface[] | null>(
-    null,
-  );
+  const [DataMachine, setDataMachine] = useState<DataMachineInterface[] | null>(null);
 
   useInterval(() => {
     setSeconds(new Date().getTime());
@@ -103,74 +97,61 @@ const LoadDataMachines: React.FC<PropsPage> = props => {
 
       const responseSettings = await api.get('/user-settings');
       const responseMachineSettings = await api.get('/machine-settings');
-      if (
-        responseMachineSettings.data &&
-        responseMachineSettings.data.length > 0
-      ) {
+      if (responseMachineSettings.data && responseMachineSettings.data.length > 0) {
         const newMachines: React.SetStateAction<MachineInterface[]> = [];
 
         if (responseSettings.data && responseSettings.data.length > 0) {
-          responseMachineSettings.data.map(
-            (eachMachineSettings: MachineInterface) => {
-              const hasMachine = responseSettings.data.filter(
-                (eachSettingsUsers: UserSettingsInterface) =>
-                  eachSettingsUsers.user_name === user.name &&
-                  eachSettingsUsers.canceled === 'N' &&
-                  eachSettingsUsers.description === eachMachineSettings.name &&
-                  eachSettingsUsers.option1 === 'allow',
-              );
-              if (hasMachine.length > 0) {
-                if (MachinesSelected.length > 0) {
-                  const machineSelected = MachinesSelected.filter(
-                    eachMachineSelected =>
-                      eachMachineSelected.description ===
-                      eachMachineSettings.description,
-                  );
-                  if (machineSelected.length > 0) {
-                    newMachines.push({
-                      ...eachMachineSettings,
-                      sequenceMachine: hasMachine[0].option2,
-                    });
-                  }
-                } else if (GroupsSelected.length > 0) {
-                  if (GroupsSelected.indexOf(eachMachineSettings.group) >= 0) {
-                    if (FactoriesSelected.length > 0) {
-                      if (
-                        FactoriesSelected.indexOf(
-                          eachMachineSettings.factory,
-                        ) >= 0
-                      ) {
-                        newMachines.push({
-                          ...eachMachineSettings,
-                          sequenceMachine: hasMachine[0].option2,
-                        });
-                      }
-                    } else {
-                      newMachines.push({
-                        ...eachMachineSettings,
-                        sequenceMachine: hasMachine[0].option2,
-                      });
-                    }
-                  }
-                } else if (FactoriesSelected.length > 0) {
-                  if (
-                    FactoriesSelected.indexOf(eachMachineSettings.factory) >= 0
-                  ) {
-                    newMachines.push({
-                      ...eachMachineSettings,
-                      sequenceMachine: hasMachine[0].option2,
-                    });
-                  }
-                } else {
+          responseMachineSettings.data.map((eachMachineSettings: MachineInterface) => {
+            const hasMachine = responseSettings.data.filter(
+              (eachSettingsUsers: UserSettingsInterface) =>
+                eachSettingsUsers.user_name === user.name &&
+                eachSettingsUsers.canceled === 'N' &&
+                eachSettingsUsers.description === eachMachineSettings.name &&
+                eachSettingsUsers.option1 === 'allow',
+            );
+            if (hasMachine.length > 0) {
+              if (MachinesSelected.length > 0) {
+                const machineSelected = MachinesSelected.filter(
+                  eachMachineSelected => eachMachineSelected.description === eachMachineSettings.description,
+                );
+                if (machineSelected.length > 0) {
                   newMachines.push({
                     ...eachMachineSettings,
                     sequenceMachine: hasMachine[0].option2,
                   });
                 }
+              } else if (GroupsSelected.length > 0) {
+                if (GroupsSelected.indexOf(eachMachineSettings.group) >= 0) {
+                  if (FactoriesSelected.length > 0) {
+                    if (FactoriesSelected.indexOf(eachMachineSettings.factory) >= 0) {
+                      newMachines.push({
+                        ...eachMachineSettings,
+                        sequenceMachine: hasMachine[0].option2,
+                      });
+                    }
+                  } else {
+                    newMachines.push({
+                      ...eachMachineSettings,
+                      sequenceMachine: hasMachine[0].option2,
+                    });
+                  }
+                }
+              } else if (FactoriesSelected.length > 0) {
+                if (FactoriesSelected.indexOf(eachMachineSettings.factory) >= 0) {
+                  newMachines.push({
+                    ...eachMachineSettings,
+                    sequenceMachine: hasMachine[0].option2,
+                  });
+                }
+              } else {
+                newMachines.push({
+                  ...eachMachineSettings,
+                  sequenceMachine: hasMachine[0].option2,
+                });
               }
-              return true;
-            },
-          );
+            }
+            return true;
+          });
 
           setAllMachines(newMachines);
         }
@@ -210,11 +191,8 @@ const LoadDataMachines: React.FC<PropsPage> = props => {
           });
 
           responseMachine.data
-            .sort(
-              (
-                dataMachine1: DataMachineInterface,
-                dataMachine2: DataMachineInterface,
-              ) => (dataMachine1.datatime > dataMachine2.datatime ? 1 : -1),
+            .sort((dataMachine1: DataMachineInterface, dataMachine2: DataMachineInterface) =>
+              dataMachine1.datatime > dataMachine2.datatime ? 1 : -1,
             )
             // eslint-disable-next-line no-loop-func
             .map((dataMachine: DataMachineInterface) => {
@@ -224,9 +202,7 @@ const LoadDataMachines: React.FC<PropsPage> = props => {
                   machine: eachMachine.description,
                 });
               } else {
-                newDataMachine = [
-                  { ...dataMachine, machine: eachMachine.description },
-                ];
+                newDataMachine = [{ ...dataMachine, machine: eachMachine.description }];
               }
 
               return true;
@@ -256,12 +232,7 @@ const LoadDataMachines: React.FC<PropsPage> = props => {
       </Backdrop>
       <Box mt={2} />
       {DataMachine ? (
-        <Graphic
-          dataMachine={DataMachine}
-          allMachines={AllMachines}
-          dateMachine={props.Date}
-          dateTimeMachine={seconds}
-        />
+        <Graphic dataMachine={DataMachine} allMachines={AllMachines} dateMachine={props.Date} dateTimeMachine={seconds} />
       ) : (
         <div />
       )}

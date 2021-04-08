@@ -30,10 +30,7 @@ const useStyles = makeStyles(theme => ({
     width: '100vw',
     backgroundImage: `url(${background})`,
     backgroundRepeat: 'no-repeat',
-    backgroundColor:
-      theme.palette.type === 'dark'
-        ? theme.palette.grey[900]
-        : theme.palette.grey[50],
+    backgroundColor: theme.palette.type === 'dark' ? theme.palette.grey[900] : theme.palette.grey[50],
     backgroundSize: 'cover',
     backgroundPosition: 'center',
   },
@@ -99,12 +96,7 @@ const SignIn: React.FC = () => {
 
   function Copyright() {
     return (
-      <Typography
-        variant="body1"
-        style={{ color: '#FFF' }}
-        color="textPrimary"
-        align="center"
-      >
+      <Typography variant="body1" style={{ color: '#FFF' }} color="textPrimary" align="center">
         © 2020, powered by
         <Link style={{ color: '#FFF' }} href="https://www.mosb.com.br">
           {' '}
@@ -151,11 +143,7 @@ const SignIn: React.FC = () => {
               <Typography style={{ color: '#FFF' }} component="h1" variant="h5">
                 Account Login
               </Typography>
-              <Form
-                ref={formRef}
-                className={classes.form}
-                onSubmit={handleSubmit}
-              >
+              <Form ref={formRef} className={classes.form} onSubmit={handleSubmit}>
                 <ValidationTextField
                   variant="outlined"
                   margin="normal"
@@ -185,12 +173,7 @@ const SignIn: React.FC = () => {
                     className: classes.input,
                   }}
                 />
-                <Button
-                  type="submit"
-                  fullWidth
-                  variant="contained"
-                  className={classes.submit}
-                >
+                <Button type="submit" fullWidth variant="contained" className={classes.submit}>
                   <Typography style={{ color: '#204098' }} component="h6">
                     Login
                   </Typography>

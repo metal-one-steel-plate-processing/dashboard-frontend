@@ -1,16 +1,9 @@
 /* eslint-disable camelcase */
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 import Card from '@material-ui/core/Card';
 import CardContent from '@material-ui/core/CardContent';
 import Typography from '@material-ui/core/Typography';
-import Table from '@material-ui/core/Table';
-import TableBody from '@material-ui/core/TableBody';
-import TableCell from '@material-ui/core/TableCell';
-import TableContainer from '@material-ui/core/TableContainer';
-import TableHead from '@material-ui/core/TableHead';
-import TableRow from '@material-ui/core/TableRow';
-import Divider from '@material-ui/core/Divider';
 import Box from '@material-ui/core/Box';
 import Autocomplete from '@material-ui/lab/Autocomplete';
 import TextField from '@material-ui/core/TextField';
@@ -18,15 +11,16 @@ import Grid from '@material-ui/core/Grid';
 import Paper from '@material-ui/core/Paper';
 import Tabs from '@material-ui/core/Tabs';
 import Tab from '@material-ui/core/Tab';
-import Button from '@material-ui/core/Button';
 import Backdrop from '@material-ui/core/Backdrop';
 import LinearProgress from '@material-ui/core/LinearProgress';
-import { CardActions } from '@material-ui/core';
 import { toast } from 'react-toastify';
 
 import { useAuth } from '../../hooks/AuthContext';
 import api from '../../services/api';
 import UserSettings from './userSettings';
+import ListMachines from '../Machine/list';
+import ListGroups from '../Machine/groupList';
+import ListReports from '../Report/listReports';
 
 interface TabPanelProps {
   // eslint-disable-next-line react/require-default-props
@@ -39,13 +33,7 @@ function TabPanel(props: TabPanelProps) {
   const { children, value, index, ...other } = props;
 
   return (
-    <div
-      role="tabpanel"
-      hidden={value !== index}
-      id={`simple-tabpanel-${index}`}
-      aria-labelledby={`simple-tab-${index}`}
-      {...other}
-    >
+    <div role="tabpanel" hidden={value !== index} id={`simple-tabpanel-${index}`} aria-labelledby={`simple-tab-${index}`} {...other}>
       {value === index && (
         <Box p={3}>
           <Typography>{children}</Typography>
@@ -101,32 +89,15 @@ const useStyles = makeStyles(theme => ({
 const MachineSettings: React.FC = () => {
   const classes = useStyles();
   const [tab, setTab] = useState(0);
-  const {
-    user,
-    setFilterFactories,
-    FactoriesSelected,
-    setFilterGroups,
-    GroupsSelected,
-    setFilterMachines,
-    MachinesSelected,
-  } = useAuth();
+  const { user, setFilterFactories, FactoriesSelected, setFilterGroups, GroupsSelected, setFilterMachines, MachinesSelected } = useAuth();
   const [SettingsUser, setSettingsUser] = useState<UserSettingsInterface[]>([]);
-  const formRef = useRef<HTMLFormElement>(null);
   const [loading, setLoading] = useState(false);
   const [AllMachines, setAllMachines] = useState<MachineInterface[]>([]);
-  const [MachinesFilters, setMachinesFilters] = useState<MachineInterface[]>(
-    [],
-  );
+  const [MachinesFilters, setMachinesFilters] = useState<MachineInterface[]>([]);
   const [AllGroups, setAllGroups] = useState<string[]>([]);
-  const [
-    FactoriesSelectedAutoComplete,
-    setFactoriesSelectedAutoComplete,
-  ] = useState<string[]>([]);
-  const [GroupsSelectedAutocomplete, setGroupsSelectedAutocomplete] = useState<
-    string[]
-  >([]);
+  const [FactoriesSelectedAutoComplete, setFactoriesSelectedAutoComplete] = useState<string[]>([]);
+  const [GroupsSelectedAutocomplete, setGroupsSelectedAutocomplete] = useState<string[]>([]);
   const [AllFactories, setAllFactories] = useState<string[]>([]);
-  const MyTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
 
   useEffect(() => {
     loadSettings();
@@ -174,9 +145,7 @@ const MachineSettings: React.FC = () => {
       return true;
     });
     setMachinesFilters(
-      FactoriesSelected.length > 0 || GroupsSelected.length > 0
-        ? machinesFiltered
-        : AllMachines.map(eachMachine => eachMachine),
+      FactoriesSelected.length > 0 || GroupsSelected.length > 0 ? machinesFiltered : AllMachines.map(eachMachine => eachMachine),
     );
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [AllMachines, FactoriesSelected, GroupsSelected]);
@@ -251,9 +220,7 @@ const MachineSettings: React.FC = () => {
       if (responseSettings.data && responseSettings.data.length > 0) {
         setSettingsUser(
           responseSettings.data.filter(
-            (eachSettingsUsers: UserSettingsInterface) =>
-              eachSettingsUsers.user_name === user.name &&
-              eachSettingsUsers.canceled === 'N',
+            (eachSettingsUsers: UserSettingsInterface) => eachSettingsUsers.user_name === user.name && eachSettingsUsers.canceled === 'N',
           ),
         );
       }
@@ -284,17 +251,13 @@ const MachineSettings: React.FC = () => {
 
       const responseGroups = await api.get('/machine-groups');
       if (responseGroups.data && responseGroups.data.length > 0) {
-        const groups = responseGroups.data.map(
-          (eachGroup: GroupsInterface) => eachGroup.description,
-        );
+        const groups = responseGroups.data.map((eachGroup: GroupsInterface) => eachGroup.description);
         setAllGroups(groups);
       }
 
       const responseFactory = await api.get('/factory');
       if (responseFactory.data && responseFactory.data.length > 0) {
-        const factories = responseFactory.data.map(
-          (eachFactory: FactoryInterface) => eachFactory.description,
-        );
+        const factories = responseFactory.data.map((eachFactory: FactoryInterface) => eachFactory.description);
         setAllFactories(factories);
       }
     } catch (error) {
@@ -308,62 +271,6 @@ const MachineSettings: React.FC = () => {
     setTab(newValue);
   };
 
-  async function handleSaveSettings() {
-    try {
-      const lineTables = formRef.current?.getElementsByClassName(
-        'eachLineTable',
-      );
-      const settingsMachines: MachineInterface[] = [];
-      setLoading(true);
-
-      if (lineTables) {
-        for (let j = 0; j < lineTables?.length; j += 1) {
-          const dataLines = lineTables[j].children;
-          if (dataLines[0].innerHTML) {
-            settingsMachines.push({
-              id: dataLines[0].innerHTML,
-              name: dataLines[1].innerHTML,
-              description: (dataLines[2].children[0].children[0]
-                .children[0] as HTMLInputElement).value,
-              group: (dataLines[3].children[0].children[0].children[0]
-                .children[0] as HTMLInputElement).value,
-              factory: (dataLines[4].children[0].children[0].children[0]
-                .children[0] as HTMLInputElement).value,
-            });
-          }
-        }
-        try {
-          if (settingsMachines.length === 0) {
-            throw new Error('any data');
-          }
-          await Promise.all(
-            settingsMachines.map(async (eachSettings: MachineInterface) => {
-              await api.put('/machine-settings', {
-                id: eachSettings.id,
-                name: eachSettings.name,
-                description: eachSettings.description,
-                group: eachSettings.group,
-                factory: eachSettings.factory,
-                page: 'Pages/Dashboard/machineSettings',
-                user: user.name,
-                user_id: user.id,
-                timezone: MyTimezone,
-              });
-            }),
-          );
-          // console.log(settingsMachines);
-          toast.success('updated successfully');
-        } catch (error) {
-          throw new Error(error);
-        }
-      }
-    } catch (error) {
-      toast.error(`${error}`);
-    } finally {
-      setLoading(false);
-    }
-  }
-
   return (
     <>
       <Backdrop className={classes.backdrop} open={loading}>
@@ -372,12 +279,17 @@ const MachineSettings: React.FC = () => {
       </Backdrop>
       <Paper>
         <Tabs value={tab} onChange={handleChangeTab}>
-          <Tab label="Filters" {...a11yProps(0)} />
-          <Tab label="Settings" {...a11yProps(1)} />
-          <Tab label="Users" {...a11yProps(2)} />
+          <Tab label="Pages" {...a11yProps(0)} />
+          <Tab label="Filters" {...a11yProps(1)} />
+          <Tab label="Machines" {...a11yProps(2)} />
+          <Tab label="Groups/Subgroups" {...a11yProps(3)} />
+          <Tab label="Users" {...a11yProps(4)} />
         </Tabs>
       </Paper>
       <TabPanel value={tab} index={0}>
+        <ListReports />
+      </TabPanel>
+      <TabPanel value={tab} index={1}>
         <Box>
           <Card>
             <CardContent>
@@ -507,152 +419,24 @@ const MachineSettings: React.FC = () => {
         </Box>
       </TabPanel>
       {SettingsUser.map(eachSettingUser => {
-        if (
-          eachSettingUser.description === 'userSettings' &&
-          eachSettingUser.option1 === 'allow'
-        ) {
+        if (eachSettingUser.description === 'userSettings' && eachSettingUser.option1 === 'allow') {
           return (
-            <TabPanel value={tab} index={1}>
-              <form ref={formRef}>
-                <Card>
-                  <CardContent>
-                    <Typography
-                      gutterBottom
-                      variant="h5"
-                      component="h2"
-                      align="left"
-                    >
-                      Machines
-                    </Typography>
-                    <Divider />
-                    <TableContainer>
-                      <Table size="small">
-                        <TableHead>
-                          <TableRow>
-                            <TableCell style={{ display: 'none' }}>
-                              Id
-                            </TableCell>
-                            <TableCell>Machine</TableCell>
-                            <TableCell>Description</TableCell>
-                            <TableCell>Group</TableCell>
-                            <TableCell>Factory</TableCell>
-                          </TableRow>
-                        </TableHead>
-                        <TableBody>
-                          {AllMachines &&
-                            AllMachines.sort((eachMachine, eachMachine2) =>
-                              eachMachine.name > eachMachine2.name ? 1 : -1,
-                            ).map((eachMachine, index) => (
-                              <TableRow
-                                key={index.toString()}
-                                className="eachLineTable"
-                              >
-                                <TableCell style={{ display: 'none' }}>
-                                  {eachMachine.id}
-                                </TableCell>
-                                <TableCell>{eachMachine.name}</TableCell>
-                                <TableCell>
-                                  <TextField
-                                    fullWidth
-                                    value={eachMachine.description}
-                                    onChange={e => {
-                                      setAllMachines(
-                                        AllMachines.map(eachMachine2 => {
-                                          return eachMachine2.name ===
-                                            eachMachine.name
-                                            ? {
-                                                ...eachMachine2,
-                                                description: e.target.value,
-                                              }
-                                            : eachMachine2;
-                                        }),
-                                      );
-                                    }}
-                                  />
-                                </TableCell>
-                                <TableCell>
-                                  <Autocomplete
-                                    options={AllGroups}
-                                    value={eachMachine.group}
-                                    onChange={(e, newValue) => {
-                                      setAllMachines(
-                                        AllMachines.map(eachMachine2 => {
-                                          return eachMachine2.name ===
-                                            eachMachine.name
-                                            ? {
-                                                ...eachMachine2,
-                                                group: newValue || '',
-                                              }
-                                            : eachMachine2;
-                                        }),
-                                      );
-                                    }}
-                                    getOptionLabel={option => option}
-                                    renderInput={params => (
-                                      <TextField
-                                        // eslint-disable-next-line react/jsx-props-no-spreading
-                                        {...params}
-                                        variant="standard"
-                                      />
-                                    )}
-                                  />
-                                </TableCell>
-                                <TableCell>
-                                  <Autocomplete
-                                    options={AllFactories}
-                                    value={eachMachine.factory}
-                                    onChange={(e, newValue) => {
-                                      setAllMachines(
-                                        AllMachines.map(eachMachine2 => {
-                                          return eachMachine2.name ===
-                                            eachMachine.name
-                                            ? {
-                                                ...eachMachine2,
-                                                factory: newValue || '',
-                                              }
-                                            : eachMachine2;
-                                        }),
-                                      );
-                                    }}
-                                    getOptionLabel={option => option}
-                                    renderInput={params => (
-                                      <TextField
-                                        // eslint-disable-next-line react/jsx-props-no-spreading
-                                        {...params}
-                                        variant="standard"
-                                      />
-                                    )}
-                                  />
-                                </TableCell>
-                              </TableRow>
-                            ))}
-                        </TableBody>
-                      </Table>
-                    </TableContainer>
-                  </CardContent>
-                  <CardActions>
-                    <Button
-                      variant="outlined"
-                      color="secondary"
-                      onClick={() => handleSaveSettings()}
-                    >
-                      Save machines
-                    </Button>
-                  </CardActions>
-                </Card>
-              </form>
-            </TabPanel>
+            <>
+              <TabPanel value={tab} index={2}>
+                <ListMachines />
+              </TabPanel>
+              <TabPanel value={tab} index={3}>
+                <ListGroups />
+              </TabPanel>
+            </>
           );
         }
         return true;
       })}
       {SettingsUser.map(eachSettingUser => {
-        if (
-          eachSettingUser.description === 'userSettings' &&
-          eachSettingUser.option1 === 'allow'
-        ) {
+        if (eachSettingUser.description === 'userSettings' && eachSettingUser.option1 === 'allow') {
           return (
-            <TabPanel value={tab} index={2}>
+            <TabPanel value={tab} index={4}>
               <UserSettings />
             </TabPanel>
           );

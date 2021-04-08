@@ -72,16 +72,10 @@ const GraphicDashboard: React.FC<PropsPage> = props => {
         // eslint-disable-next-line react/prop-types
         props.dataMachine
           // eslint-disable-next-line react/prop-types
-          .filter(
-            (dataMachine: DataMachineInterface) =>
-              dataMachine.machine === eachMachine,
-          )
+          .filter((dataMachine: DataMachineInterface) => dataMachine.machine === eachMachine)
           // eslint-disable-next-line react/prop-types
-          .sort(
-            (
-              dataMachine1: DataMachineInterface,
-              dataMachine2: DataMachineInterface,
-            ) => (dataMachine1.datatime > dataMachine2.datatime ? 1 : -1),
+          .sort((dataMachine1: DataMachineInterface, dataMachine2: DataMachineInterface) =>
+            dataMachine1.datatime > dataMachine2.datatime ? 1 : -1,
           )
           // eslint-disable-next-line no-loop-func
           .map((dataMachine: DataMachineInterface) => {
@@ -118,14 +112,10 @@ const GraphicDashboard: React.FC<PropsPage> = props => {
                 ];
               }
               statusLast = dataMachine.status;
-              statusLastGetTime = parseISO(
-                dataMachine.datatime.toString(),
-              ).getTime();
+              statusLastGetTime = parseISO(dataMachine.datatime.toString()).getTime();
             } else if (!statusLast) {
               statusLast = dataMachine.status;
-              statusLastGetTime = parseISO(
-                dataMachine.datatime.toString(),
-              ).getTime();
+              statusLastGetTime = parseISO(dataMachine.datatime.toString()).getTime();
             }
 
             if (dataMachine.status && dataMachine.status === '0190') {
@@ -142,9 +132,7 @@ const GraphicDashboard: React.FC<PropsPage> = props => {
               connected += 2;
             }
 
-            statusLastTime = parseISO(
-              dataMachine.datatime.toString(),
-            ).getTime();
+            statusLastTime = parseISO(dataMachine.datatime.toString()).getTime();
 
             return true;
           });
@@ -272,9 +260,7 @@ const GraphicDashboard: React.FC<PropsPage> = props => {
                 },
                 categories: map(series, (s: SeriesInterface) => {
                   return (s.operating > 0 && s.connected > 0
-                    ? (parseFloat(s.operating.toString()) /
-                        parseFloat(s.connected.toString())) *
-                      100
+                    ? (parseFloat(s.operating.toString()) / parseFloat(s.connected.toString())) * 100
                     : 0
                   ).toFixed(1);
                 }),
@@ -284,10 +270,7 @@ const GraphicDashboard: React.FC<PropsPage> = props => {
                   text: 'Oper.',
                 },
                 categories: map(series, (s: SeriesInterface) => {
-                  return formatDuration(
-                    { minutes: s.operating },
-                    { format: ['hours', 'minutes'] },
-                  );
+                  return formatDuration({ minutes: s.operating }, { format: ['hours', 'minutes'] });
                 }),
               },
               {
@@ -295,10 +278,7 @@ const GraphicDashboard: React.FC<PropsPage> = props => {
                   text: 'On',
                 },
                 categories: map(series, (s: SeriesInterface) => {
-                  return formatDuration(
-                    { minutes: s.connected },
-                    { format: ['hours', 'minutes'] },
-                  );
+                  return formatDuration({ minutes: s.connected }, { format: ['hours', 'minutes'] });
                 }),
               },
             ],
@@ -307,13 +287,7 @@ const GraphicDashboard: React.FC<PropsPage> = props => {
       };
       // setOptions(newOptions);
 
-      return (
-        <HighchartsReact
-          highcharts={Highcharts}
-          constructorType="ganttChart"
-          options={newOptions}
-        />
-      );
+      return <HighchartsReact highcharts={Highcharts} constructorType="ganttChart" options={newOptions} />;
     }
 
     return <h5>No Graph 1</h5>;
