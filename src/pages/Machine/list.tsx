@@ -100,7 +100,6 @@ const MachineList: React.FC = () => {
 
             return true;
           });
-          console.log(newMachineSettings);
           setAllMachines(newMachineSettings);
         }
       }
