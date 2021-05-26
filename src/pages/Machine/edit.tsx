@@ -3,7 +3,6 @@
 /* eslint-disable import/no-extraneous-dependencies */
 /* eslint-disable jsx-a11y/label-has-associated-control */
 import React, { useState, useRef, forwardRef, useImperativeHandle } from 'react';
-import useMediaQuery from '@material-ui/core/useMediaQuery';
 import Button from '@material-ui/core/Button';
 import Dialog from '@material-ui/core/Dialog';
 import DialogActions from '@material-ui/core/DialogActions';
@@ -14,23 +13,19 @@ import TextField from '@material-ui/core/TextField';
 import Autocomplete from '@material-ui/lab/Autocomplete';
 import Card from '@material-ui/core/Card';
 import CardActions from '@material-ui/core/CardActions';
-import CardContent from '@material-ui/core/CardContent';
+import CardActionArea from '@material-ui/core/CardActionArea';
+import CardMedia from '@material-ui/core/CardMedia';
+import Box from '@material-ui/core/Box';
+import InputAdornment from '@material-ui/core/InputAdornment';
 
 import { toast } from 'react-toastify';
-import ColorPicker, { useColor, toColor } from 'react-color-palette';
+import { GithubPicker, ColorResult } from 'react-color';
 import 'react-color-palette/lib/css/styles.css';
 
-import Box from '@material-ui/core/Box';
-import List from '@material-ui/core/List';
-import ListItem from '@material-ui/core/ListItem';
-import { Breakpoint } from '@material-ui/core/styles/createBreakpoints';
-import { Theme, useTheme } from '@material-ui/core/styles';
 import BackdropComponent from '../../components/BackdropComponent';
 import api from '../../services/api';
 import { useAuth } from '../../hooks/AuthContext';
 import noImg from '../../assets/not-available.png';
-
-type BreakpointOrNull = Breakpoint | null;
 
 export interface DialogHandles {
   loadDataMachine: (id: string) => void;
@@ -49,6 +44,40 @@ interface FactoryInterface {
   description: string;
 }
 
+interface PropsComponenteImage {
+  img: string;
+  handleSubmitImg: (file: File) => void;
+  handleSubmitImgRemove: () => void;
+}
+
+function ComponenteImage(props: PropsComponenteImage) {
+  const { img, handleSubmitImg, handleSubmitImgRemove } = props;
+  return (
+    <Card>
+      <CardActionArea>
+        <CardMedia style={{ height: '400px' }} image={img || noImg} title="machine img" />
+      </CardActionArea>
+      <CardActions>
+        <input
+          accept="image/*"
+          style={{ display: 'none' }}
+          type="file"
+          id="contained-button-file-card"
+          onChange={e => e.target.files && handleSubmitImg(e.target.files[0])}
+        />
+        <Button size="small" disabled={!!img} color="secondary" onClick={() => handleSubmitImgRemove()}>
+          Remove
+        </Button>
+        <label htmlFor="contained-button-file-card">
+          <Button size="small" color="secondary" component="span">
+            alter
+          </Button>
+        </label>
+      </CardActions>
+    </Card>
+  );
+}
+
 const MachineEdit: React.ForwardRefRenderFunction<DialogHandles, InterfaceProps> = (props, ref) => {
   const [loading, setLoading] = useState(false);
   const [OpenMachineEdit, setOpenMachineEdit] = useState(false);
@@ -60,40 +89,33 @@ const MachineEdit: React.ForwardRefRenderFunction<DialogHandles, InterfaceProps>
   const [SubgroupSelected, setSubgroupSelected] = useState('');
   const [AllFactories, setAllFactories] = useState<string[]>([]);
   const [FactorySelected, setFactorySelected] = useState('');
-  const [ColorLow, setColorLow] = useColor('hex', '#ffffff');
-  const [ColorAverage, setColorAvarege] = useColor('hex', '#ffffff');
-  const [ColorHigh, setColorHigh] = useColor('hex', '#ffffff');
+  const [ColorPickerLow, setColorPickerLow] = useState('#ffffff');
+  const [ColorPickerAverage, setColorPickerAverage] = useState('#ffffff');
+  const [ColorPickerHigh, setColorPickerHigh] = useState('#ffffff');
   const [MachineImg, setMachineImg] = useState('');
   const { user } = useAuth();
   const MyTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+  const colorsPiker = [
+    '#f1eeee',
+    '#B80000',
+    '#DB3E00',
+    '#FCCB00',
+    '#008B02',
+    '#006B76',
+    '#1273DE',
+    '#004DCF',
+    '#5300EB',
+    '#ffffff',
+    '#EB9694',
+    '#FAD0C3',
+    '#FEF3BD',
+    '#C1E1C5',
+    '#BEDADC',
+    '#C4DEF6',
+    '#BED3F3',
+    '#D4C4FB',
+  ];
 
-  function useWidth() {
-    const theme: Theme = useTheme();
-    const keys: Breakpoint[] = [...theme.breakpoints.keys].reverse();
-    return (
-      keys.reduce((output: BreakpointOrNull, key: Breakpoint) => {
-        // eslint-disable-next-line react-hooks/rules-of-hooks
-        const matches = useMediaQuery(theme.breakpoints.up(key));
-        return !output && matches ? key : output;
-      }, null) || 'xs'
-    );
-  }
-  const brackpointValue = useWidth();
-
-  const widthImg = () => {
-    switch (brackpointValue) {
-      case 'xs':
-        return 215;
-      case 'sm':
-        return 150;
-      case 'md':
-        return 250;
-      case 'lg':
-        return 160;
-      default:
-        return 200;
-    }
-  };
   async function loadDataMachine(id: string) {
     try {
       setOpenMachineEdit(true);
@@ -134,6 +156,14 @@ const MachineEdit: React.ForwardRefRenderFunction<DialogHandles, InterfaceProps>
         (document.querySelector("[name='low_efficiency']") as HTMLInputElement).value = dataMachine.low_efficiency;
         (document.querySelector("[name='average_efficiency']") as HTMLInputElement).value = dataMachine.average_efficiency;
         (document.querySelector("[name='high_efficiency']") as HTMLInputElement).value = dataMachine.high_efficiency;
+        (document.querySelector("[name='brand']") as HTMLInputElement).value = dataMachine.brand;
+        (document.querySelector("[name='model']") as HTMLInputElement).value = dataMachine.model;
+        (document.querySelector("[name='table_length']") as HTMLInputElement).value = dataMachine.table_length;
+        (document.querySelector("[name='table_width']") as HTMLInputElement).value = dataMachine.table_width;
+        (document.querySelector("[name='auto_feeding']") as HTMLInputElement).value = dataMachine.auto_feeding;
+        (document.querySelector("[name='capacity']") as HTMLInputElement).value = dataMachine.capacity;
+        (document.querySelector("[name='speed']") as HTMLInputElement).value = dataMachine.speed;
+        (document.querySelector("[name='memo']") as HTMLInputElement).value = dataMachine.memo;
       } catch (error) {
         toast.error(`Error setFormdata : ${error.message}`);
       }
@@ -142,9 +172,9 @@ const MachineEdit: React.ForwardRefRenderFunction<DialogHandles, InterfaceProps>
       setGroupSelected(dataMachine.group);
       setSubgroupSelected(dataMachine.subgroup);
       setFactorySelected(dataMachine.factory);
-      setColorLow(toColor('hex', dataMachine.low_color || '#ffffff'));
-      setColorAvarege(toColor('hex', dataMachine.average_color || '#ffffff'));
-      setColorHigh(toColor('hex', dataMachine.high_color || '#ffffff'));
+      dataMachine.low_color && setColorPickerLow(dataMachine.low_color);
+      dataMachine.average_color && setColorPickerAverage(dataMachine.average_color);
+      dataMachine.high_color && setColorPickerHigh(dataMachine.high_color);
       dataMachine.file_url && setMachineImg(dataMachine.file_url);
     } catch (error) {
       toast.error(error);
@@ -173,9 +203,9 @@ const MachineEdit: React.ForwardRefRenderFunction<DialogHandles, InterfaceProps>
       if (idMachine) {
         try {
           let data = {
-            low_color: ColorLow.hex,
-            high_color: ColorHigh.hex,
-            average_color: ColorAverage.hex,
+            low_color: ColorPickerLow,
+            high_color: ColorPickerHigh,
+            average_color: ColorPickerAverage,
             group: GroupSelected,
             subgroup: SubgroupSelected,
             factory: FactorySelected,
@@ -238,11 +268,45 @@ const MachineEdit: React.ForwardRefRenderFunction<DialogHandles, InterfaceProps>
           throw new Error('Id Form not found');
         }
       } catch (error) {
-        toast.error(`Erro ao salvar: ${error}`);
+        toast.error(`Error: ${error}`);
       } finally {
         setLoading(false);
       }
     }
+  }
+
+  async function handleSubmitImgRemove() {
+    try {
+      setLoading(true);
+      const idMachine = inputRefIdEditMachine.current?.value;
+
+      if (idMachine) {
+        await api.post('machine-settings-image/delete', {
+          id: idMachine,
+          user: user.name,
+          user_id: user.id,
+          timezone: MyTimezone,
+        });
+        setMachineImg('');
+        toast.success('Removed Image!');
+      } else {
+        throw new Error('Id Form not found');
+      }
+    } catch (error) {
+      toast.error(`Error: ${error}`);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  function handleChangeColorLow(color: ColorResult) {
+    setColorPickerLow(color.hex);
+  }
+  function handleChangeColorAverage(color: ColorResult) {
+    setColorPickerAverage(color.hex);
+  }
+  function handleChangeColorHigh(color: ColorResult) {
+    setColorPickerHigh(color.hex);
   }
 
   return (
@@ -252,78 +316,119 @@ const MachineEdit: React.ForwardRefRenderFunction<DialogHandles, InterfaceProps>
         <DialogContent>
           <BackdropComponent state={loading} message="Loading Machine Data" />
           <form ref={formRefEditMachine} autoComplete="off" className="classFormEditMachine">
-            <Grid container spacing={2}>
-              <Grid item xs={12} sm={4} md={2}>
-                <TextField style={{ display: 'none' }} inputRef={inputRefIdEditMachine} name="machineId" />
-                <TextField
-                  fullWidth
-                  InputLabelProps={{ shrink: true }}
-                  InputProps={{ readOnly: true }}
-                  label="Machine"
-                  name="machineName"
-                  disabled
-                />
+            <Grid container spacing={1}>
+              <Grid item xs={12} md={5} lg={4}>
+                <ComponenteImage img={MachineImg} handleSubmitImg={handleSubmitImg} handleSubmitImgRemove={handleSubmitImgRemove} />
               </Grid>
-              <Grid item xs={12} sm={4} md={2}>
-                <TextField fullWidth InputLabelProps={{ shrink: true }} label="Description" name="machineDescription" />
-              </Grid>
-              <Grid item xs={12} sm={4} md={2}>
-                <Autocomplete
-                  options={AllFactories}
-                  value={FactorySelected}
-                  getOptionLabel={option => option}
-                  onChange={(event, value) => setFactorySelected(value || '')}
-                  renderInput={params => (
+              <Grid item xs={12} md={7} lg={8}>
+                <Grid container spacing={1}>
+                  <Grid item xs={12} sm={6} lg={3}>
+                    <TextField style={{ display: 'none' }} inputRef={inputRefIdEditMachine} name="machineId" />
                     <TextField
-                      // eslint-disable-next-line react/jsx-props-no-spreading
-                      {...params}
-                      variant="standard"
-                      label="Factory"
+                      fullWidth
+                      InputLabelProps={{ shrink: true }}
+                      InputProps={{ readOnly: true }}
+                      label="Machine"
+                      name="machineName"
+                      disabled
                     />
-                  )}
-                />
-              </Grid>
-              <Grid item xs={12} sm={6} md={3}>
-                <Autocomplete
-                  options={AllGroups}
-                  value={GroupSelected}
-                  getOptionLabel={option => option}
-                  onChange={(event, value) => setGroupSelected(value || '')}
-                  renderInput={params => (
+                  </Grid>
+                  <Grid item xs={12} sm={6} lg={3}>
+                    <Autocomplete
+                      options={AllFactories}
+                      value={FactorySelected}
+                      getOptionLabel={option => option}
+                      onChange={(event, value) => setFactorySelected(value || '')}
+                      renderInput={params => (
+                        <TextField
+                          // eslint-disable-next-line react/jsx-props-no-spreading
+                          {...params}
+                          variant="standard"
+                          label="Factory"
+                        />
+                      )}
+                    />
+                  </Grid>
+                  <Grid item xs={12} lg={6}>
+                    <TextField fullWidth InputLabelProps={{ shrink: true }} label="Description" name="machineDescription" />
+                  </Grid>
+                  <Grid item xs={12} sm={4} lg={3}>
+                    <TextField fullWidth InputLabelProps={{ shrink: true }} label="Brand" name="brand" />
+                  </Grid>
+                  <Grid item xs={12} sm={4} lg={3}>
+                    <TextField fullWidth InputLabelProps={{ shrink: true }} label="Model" name="model" />
+                  </Grid>
+                  <Grid item xs={12} sm={4} lg={3}>
+                    <Autocomplete
+                      options={AllGroups}
+                      value={GroupSelected}
+                      getOptionLabel={option => option}
+                      onChange={(event, value) => setGroupSelected(value || '')}
+                      renderInput={params => (
+                        <TextField
+                          // eslint-disable-next-line react/jsx-props-no-spreading
+                          {...params}
+                          variant="standard"
+                          label="Group"
+                        />
+                      )}
+                    />
+                  </Grid>
+                  <Grid item xs={12} sm={4} lg={3}>
+                    <Autocomplete
+                      options={AllSubgroups}
+                      value={SubgroupSelected}
+                      getOptionLabel={option => option}
+                      onChange={(event, value) => setSubgroupSelected(value || '')}
+                      renderInput={params => (
+                        <TextField
+                          // eslint-disable-next-line react/jsx-props-no-spreading
+                          {...params}
+                          variant="standard"
+                          label="Subgroup"
+                        />
+                      )}
+                    />
+                  </Grid>
+                  <Grid item xs={12} sm={4}>
                     <TextField
-                      // eslint-disable-next-line react/jsx-props-no-spreading
-                      {...params}
-                      variant="standard"
-                      label="Group"
+                      fullWidth
+                      InputLabelProps={{ shrink: true }}
+                      label="Table Length"
+                      name="table_length"
+                      type="number"
+                      InputProps={{
+                        endAdornment: <InputAdornment position="end">mm</InputAdornment>,
+                      }}
+                      helperText="In millimeters"
                     />
-                  )}
-                />
-              </Grid>
-              <Grid item xs={12} sm={6} md={3}>
-                <Autocomplete
-                  options={AllSubgroups}
-                  value={SubgroupSelected}
-                  getOptionLabel={option => option}
-                  onChange={(event, value) => setSubgroupSelected(value || '')}
-                  renderInput={params => (
+                  </Grid>
+                  <Grid item xs={12} sm={4}>
                     <TextField
-                      // eslint-disable-next-line react/jsx-props-no-spreading
-                      {...params}
-                      variant="standard"
-                      label="Subgroup"
+                      fullWidth
+                      InputLabelProps={{ shrink: true }}
+                      label="Table Width"
+                      name="table_width"
+                      type="number"
+                      InputProps={{
+                        endAdornment: <InputAdornment position="end">mm</InputAdornment>,
+                      }}
+                      helperText="In millimeters"
                     />
-                  )}
-                />
-              </Grid>
-            </Grid>
-            <Box mt={2} />
-            <Grid container justify="center" spacing={1}>
-              <Grid item xs={12} sm={4} md={4} lg={2}>
-                <Card elevation={0} variant="outlined">
-                  <CardContent>
-                    <ColorPicker width={widthImg()} color={ColorLow} onChange={setColorLow} hideRGB hideHSB />
-                  </CardContent>
-                  <CardActions>
+                  </Grid>
+                  <Grid item xs={12} sm={4} lg={2}>
+                    <TextField fullWidth InputLabelProps={{ shrink: true }} label="Auto feeding" name="auto_feeding" />
+                  </Grid>
+                  <Grid item xs={12} sm={4} lg={2}>
+                    <TextField fullWidth InputLabelProps={{ shrink: true }} label="Capacity" name="capacity" />
+                  </Grid>
+                  <Grid item xs={12} sm={4} lg={2}>
+                    <TextField fullWidth InputLabelProps={{ shrink: true }} label="Speed" name="speed" />
+                  </Grid>
+                  <Grid item xs={12} lg={10}>
+                    <TextField fullWidth InputLabelProps={{ shrink: true }} label="Memo" name="memo" />
+                  </Grid>
+                  <Grid item xs={12} sm={4} lg>
                     <TextField
                       fullWidth
                       InputLabelProps={{ shrink: true }}
@@ -331,15 +436,12 @@ const MachineEdit: React.ForwardRefRenderFunction<DialogHandles, InterfaceProps>
                       name="low_efficiency"
                       type="number"
                     />
-                  </CardActions>
-                </Card>
-              </Grid>
-              <Grid item xs={12} sm={4} md={4} lg={2}>
-                <Card elevation={0} variant="outlined">
-                  <CardContent>
-                    <ColorPicker width={widthImg()} color={ColorAverage} onChange={setColorAvarege} hideRGB hideHSB />
-                  </CardContent>
-                  <CardActions>
+                    {ColorPickerLow !== '#ffffff' && <Box style={{ backgroundColor: ColorPickerLow, height: '20px' }} />}
+                    <Box mt={1} style={{ maxWidth: '237px' }}>
+                      <GithubPicker colors={colorsPiker} width="100%" color={ColorPickerLow} onChange={handleChangeColorLow} />
+                    </Box>
+                  </Grid>
+                  <Grid item xs={12} sm={4} lg>
                     <TextField
                       fullWidth
                       InputLabelProps={{ shrink: true }}
@@ -347,15 +449,12 @@ const MachineEdit: React.ForwardRefRenderFunction<DialogHandles, InterfaceProps>
                       name="average_efficiency"
                       type="number"
                     />
-                  </CardActions>
-                </Card>
-              </Grid>
-              <Grid item xs={12} sm={4} md={4} lg={2}>
-                <Card elevation={0} variant="outlined">
-                  <CardContent>
-                    <ColorPicker width={widthImg()} color={ColorHigh} onChange={setColorHigh} hideRGB hideHSB />
-                  </CardContent>
-                  <CardActions>
+                    {ColorPickerAverage !== '#ffffff' && <Box style={{ backgroundColor: ColorPickerAverage, height: '20px' }} />}
+                    <Box mt={1} style={{ maxWidth: '237px' }}>
+                      <GithubPicker colors={colorsPiker} width="100%" color={ColorPickerAverage} onChange={handleChangeColorAverage} />
+                    </Box>
+                  </Grid>
+                  <Grid item xs={12} sm={4} lg>
                     <TextField
                       fullWidth
                       InputLabelProps={{ shrink: true }}
@@ -363,30 +462,12 @@ const MachineEdit: React.ForwardRefRenderFunction<DialogHandles, InterfaceProps>
                       name="high_efficiency"
                       type="number"
                     />
-                  </CardActions>
-                </Card>
-              </Grid>
-              <Grid item xs={12} sm={12} md={12} lg={6}>
-                <Card elevation={0} variant="outlined">
-                  <CardContent>
-                    <Grid container spacing={2} justify="center">
-                      <input
-                        accept="image/*"
-                        style={{ display: 'none' }}
-                        type="file"
-                        id="contained-button-file"
-                        onChange={e => e.target.files && handleSubmitImg(e.target.files[0])}
-                      />
-                      <List dense>
-                        <label htmlFor="contained-button-file">
-                          <ListItem button>
-                            <img src={MachineImg || noImg} alt="img" width={widthImg() * 2} />
-                          </ListItem>
-                        </label>
-                      </List>
-                    </Grid>
-                  </CardContent>
-                </Card>
+                    {ColorPickerHigh !== '#ffffff' && <Box style={{ backgroundColor: ColorPickerHigh, height: '20px' }} />}
+                    <Box mt={1} style={{ maxWidth: '237px' }}>
+                      <GithubPicker colors={colorsPiker} width="100%" color={ColorPickerHigh} onChange={handleChangeColorHigh} />
+                    </Box>
+                  </Grid>
+                </Grid>
               </Grid>
             </Grid>
           </form>

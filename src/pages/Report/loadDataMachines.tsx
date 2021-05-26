@@ -94,7 +94,7 @@ interface MachineInterface {
   description: string;
   group: string;
   factory: string;
-  sequenceMachine: string;
+  sequenceMachine: number;
   file_url?: string;
 }
 
@@ -148,6 +148,7 @@ const LoadDataMachinesReport: React.FC = () => {
   const [seriesExport, setSeriesExport] = useState<SeriesExportInterface[]>([]);
   const [OpenViewMachineImage, setOpenViewMachineImage] = React.useState(false);
   const [MachineImage, setMachineImage] = React.useState('');
+  const [CSVSeparator, setCSVSeparator] = useState(';');
 
   const handleClickOpenViewMachineImage = (machineFile: string) => {
     if (machineFile) {
@@ -209,19 +210,21 @@ const LoadDataMachinesReport: React.FC = () => {
     try {
       setLoading(true);
 
-      const responseSettings = await api.get('/user-settings');
+      const responseSettings = await api.get(`/user-settings/${user.id}`);
+
       const responseMachineSettings = await api.get('/machine-settings');
       if (responseMachineSettings.data && responseMachineSettings.data.length > 0) {
         const newMachines: MachineInterface[] = [];
 
         if (responseSettings.data && responseSettings.data.length > 0) {
+          responseSettings.data.map(
+            (eachSettingsUsers: UserSettingsInterface) =>
+              eachSettingsUsers.description === 'csvSeparator' && eachSettingsUsers.option1 && setCSVSeparator(eachSettingsUsers.option1),
+          );
           responseMachineSettings.data.map((eachMachineSettings: MachineInterface) => {
             const hasMachine = responseSettings.data.filter(
               (eachSettingsUsers: UserSettingsInterface) =>
-                eachSettingsUsers.user_name === user.name &&
-                eachSettingsUsers.canceled === 'N' &&
-                eachSettingsUsers.description === eachMachineSettings.name &&
-                eachSettingsUsers.option1 === 'allow',
+                eachSettingsUsers.description === eachMachineSettings.name && eachSettingsUsers.option1 === 'allow',
             );
             if (hasMachine.length > 0) {
               if (MachinesSelected.length > 0) {
@@ -248,7 +251,7 @@ const LoadDataMachinesReport: React.FC = () => {
               } else {
                 newMachines.push({
                   ...eachMachineSettings,
-                  sequenceMachine: hasMachine[0].option2,
+                  sequenceMachine: parseInt(hasMachine[0].option2 || 9999, 10),
                 });
               }
             }
@@ -547,28 +550,24 @@ const LoadDataMachinesReport: React.FC = () => {
     /* console.log('*************loadSeriesExport'); */
     const newDataSeriesExport: SeriesExportInterface[] = [];
 
-    AllMachines.sort((eachMachine, eachMachine2) => {
-      if (eachMachine.sequenceMachine && eachMachine2.sequenceMachine) {
-        return parseFloat(eachMachine.sequenceMachine) > parseFloat(eachMachine2.sequenceMachine) ? 1 : -1;
-      }
-      return 0;
-    }).map(eachMachine => {
-      /* console.log(indexEachMachine); */
-      let eachDataSeriesExport = {};
-      eachDay &&
-        eachDay.map(eachDaySelected => {
-          const dataSeriesMachine = series
-            ? series.filter(
-                (eachSeries: SeriesInterface) =>
-                  eachSeries.machineId === eachMachine.id && eachSeries.eachDay === eachDaySelected.getDate(),
-              )
-            : [];
+    AllMachines.sort((eachMachine, eachMachine2) => (eachMachine.sequenceMachine > eachMachine2.sequenceMachine ? 1 : -1)).map(
+      eachMachine => {
+        /* console.log(indexEachMachine); */
+        let eachDataSeriesExport = {};
+        eachDay &&
+          eachDay.map(eachDaySelected => {
+            const dataSeriesMachine = series
+              ? series.filter(
+                  (eachSeries: SeriesInterface) =>
+                    eachSeries.machineId === eachMachine.id && eachSeries.eachDay === eachDaySelected.getDate(),
+                )
+              : [];
 
-          /* console.log(eachMachine.id);
+            /* console.log(eachMachine.id);
           console.log(eachDaySelected.getDate()); */
-          /* console.log('dataSeriesMachine');
+            /* console.log('dataSeriesMachine');
           console.log(dataSeriesMachine); */
-          /* indexEachMachine === 0 &&
+            /* indexEachMachine === 0 &&
             eachDataSeriesExport = {
               ...eachDataSeriesExport,
               Machine: '',
@@ -576,7 +575,7 @@ const LoadDataMachinesReport: React.FC = () => {
               [`${format(eachDaySelected, "MMMM d',' yyyy")} Operating`]: '',
               [`${format(eachDaySelected, "MMMM d',' yyyy")} Efficiency`]: '',
             }; */
-          /* const eachDaySelectedData = {
+            /* const eachDaySelectedData = {
             Machine: `${eachMachine.factory} - ${eachMachine.description}`,
             Connected:
               dataSeriesMachine && dataSeriesMachine.length > 0
@@ -609,24 +608,25 @@ const LoadDataMachinesReport: React.FC = () => {
             ...eachDataSeriesExport,
             ...eachDaySelectedData,
           }; */
-          eachDataSeriesExport = {
-            ...eachDataSeriesExport,
-            Machine: `${eachMachine.factory} - ${eachMachine.description}`,
-            [`${format(eachDaySelected, "MMMM d',' yyyy")} Connected`]:
-              dataSeriesMachine && dataSeriesMachine.length > 0 ? dataSeriesMachine[0].connected : '-',
-            [`${format(eachDaySelected, "MMMM d',' yyyy")} Operating`]:
-              dataSeriesMachine && dataSeriesMachine.length > 0 ? dataSeriesMachine[0].operating : '-',
-            [`${format(eachDaySelected, "MMMM d',' yyyy")} Efficiency`]:
-              dataSeriesMachine && dataSeriesMachine.length > 0 ? dataSeriesMachine[0].efficiency?.toFixed(2) : '-',
-          };
+            eachDataSeriesExport = {
+              ...eachDataSeriesExport,
+              Machine: `${eachMachine.factory} - ${eachMachine.description}`,
+              [`${format(eachDaySelected, "MMMM d',' yyyy")} Connected`]:
+                dataSeriesMachine && dataSeriesMachine.length > 0 ? dataSeriesMachine[0].connected : '-',
+              [`${format(eachDaySelected, "MMMM d',' yyyy")} Operating`]:
+                dataSeriesMachine && dataSeriesMachine.length > 0 ? dataSeriesMachine[0].operating : '-',
+              [`${format(eachDaySelected, "MMMM d',' yyyy")} Efficiency`]:
+                dataSeriesMachine && dataSeriesMachine.length > 0 ? dataSeriesMachine[0].efficiency?.toFixed(2) : '-',
+            };
 
-          return true;
-        });
-      /* console.log('+++eachDataSeriesExport :');
+            return true;
+          });
+        /* console.log('+++eachDataSeriesExport :');
       console.log(eachDataSeriesExport); */
-      newDataSeriesExport.push(eachDataSeriesExport as SeriesExportInterface);
-      return true;
-    });
+        newDataSeriesExport.push(eachDataSeriesExport as SeriesExportInterface);
+        return true;
+      },
+    );
 
     /* console.log(newDataSeriesExport); */
     setSeriesExport(newDataSeriesExport);
@@ -727,7 +727,7 @@ const LoadDataMachinesReport: React.FC = () => {
               dateRange.endDate && format(dateRange.endDate, 'MMMM_d_yyyy')
             }.csv`}
             data={seriesExport}
-            separator=";"
+            separator={CSVSeparator}
           >
             <Button variant="outlined" color="default" size="small" startIcon={<FontAwesomeIcon icon={faFileCsv} size="lg" />}>
               Export CSV
@@ -808,109 +808,106 @@ const LoadDataMachinesReport: React.FC = () => {
                 </TableRow>
               </TableHead>
               <TableBody>
-                {AllMachines.sort((eachMachine, eachMachine2) => {
-                  if (eachMachine.sequenceMachine && eachMachine2.sequenceMachine) {
-                    return parseFloat(eachMachine.sequenceMachine) > parseFloat(eachMachine2.sequenceMachine) ? 1 : -1;
-                  }
-                  return 0;
-                }).map(eachMachine => {
-                  return (
-                    <TableRow hover role="checkbox" tabIndex={-1}>
-                      <TableCell
-                        style={{
-                          borderRight: '1px solid #e0e0e0',
-                          padding: '1px',
-                          minWidth: '200px',
-                        }}
-                      >
-                        <div className={classes.machineDescription}>
-                          <Tooltip
-                            title={handleViewMachineDetails(eachMachine.description, eachMachine.file_url || '', eachMachine.factory)}
-                          >
-                            <AvatarGroup>
-                              <Avatar
-                                alt={eachMachine.factory}
-                                src={eachMachine.factory === 'IMOP' ? TagIMOP : TagMOSB}
-                                className={classes.small}
-                              />
-                              <Avatar
-                                alt={eachMachine.name}
-                                src={eachMachine.file_url}
-                                className={classes.small}
-                                component={ButtonBase}
-                                onClick={() => handleClickOpenViewMachineImage(eachMachine.file_url || '')}
-                              >
-                                <BrokenImageIcon />
-                              </Avatar>
-                            </AvatarGroup>
-                          </Tooltip>
-                          <Typography variant="body2">{`${eachMachine.factory} - ${eachMachine.description}`}</Typography>
-                        </div>
-                      </TableCell>
-                      {eachDay &&
-                        eachDay.map(eachDaySelected => {
-                          const dataSeriesMachine = series
-                            ? series.filter(
-                                (eachSeries: SeriesInterface) =>
-                                  eachSeries.machineId === eachMachine.id && eachSeries.eachDay === eachDaySelected.getDate(),
-                              )
-                            : [];
-                          /* console.log(eachMachine.id);
+                {AllMachines.sort((eachMachine, eachMachine2) => (eachMachine.sequenceMachine > eachMachine2.sequenceMachine ? 1 : -1)).map(
+                  eachMachine => {
+                    return (
+                      <TableRow hover role="checkbox" tabIndex={-1}>
+                        <TableCell
+                          style={{
+                            borderRight: '1px solid #e0e0e0',
+                            padding: '1px',
+                            minWidth: '200px',
+                          }}
+                        >
+                          <div className={classes.machineDescription}>
+                            <Tooltip
+                              title={handleViewMachineDetails(eachMachine.description, eachMachine.file_url || '', eachMachine.factory)}
+                            >
+                              <AvatarGroup>
+                                <Avatar
+                                  alt={eachMachine.factory}
+                                  src={eachMachine.factory === 'IMOP' ? TagIMOP : TagMOSB}
+                                  className={classes.small}
+                                />
+                                <Avatar
+                                  alt={eachMachine.name}
+                                  src={eachMachine.file_url}
+                                  className={classes.small}
+                                  component={ButtonBase}
+                                  onClick={() => handleClickOpenViewMachineImage(eachMachine.file_url || '')}
+                                >
+                                  <BrokenImageIcon />
+                                </Avatar>
+                              </AvatarGroup>
+                            </Tooltip>
+                            <Typography variant="body2">{`${eachMachine.factory} - ${eachMachine.description}`}</Typography>
+                          </div>
+                        </TableCell>
+                        {eachDay &&
+                          eachDay.map(eachDaySelected => {
+                            const dataSeriesMachine = series
+                              ? series.filter(
+                                  (eachSeries: SeriesInterface) =>
+                                    eachSeries.machineId === eachMachine.id && eachSeries.eachDay === eachDaySelected.getDate(),
+                                )
+                              : [];
+                            /* console.log(eachMachine.id);
                           console.log(eachDaySelected.getDate()); */
-                          /* console.log('dataSeriesMachine');
+                            /* console.log('dataSeriesMachine');
                           console.log(dataSeriesMachine); */
-                          return (
-                            <>
-                              <TableCell
-                                align="center"
-                                style={{
-                                  borderLeft: '1px solid #e0e0e0',
-                                  padding: '1px',
-                                  minWidth: '72px',
-                                  width: '72px',
-                                  maxWidth: '72px',
-                                }}
-                              >
-                                {dataSeriesMachine && dataSeriesMachine.length > 0 ? dataSeriesMachine[0].connected : '-'}
-                              </TableCell>
-                              <TableCell
-                                align="center"
-                                style={{
-                                  borderLeft: '1px solid #e0e0e0',
-                                  padding: '1px',
-                                  minWidth: '68px',
-                                  width: '68px',
-                                  maxWidth: '68px',
-                                }}
-                              >
-                                {dataSeriesMachine && dataSeriesMachine.length > 0 ? dataSeriesMachine[0].operating : '-'}
-                              </TableCell>
-                              <TableCell
-                                align="center"
-                                className={
-                                  dataSeriesMachine.length > 0 && dataSeriesMachine[0].efficiency_style !== ''
-                                    ? dataSeriesMachine[0].efficiency_style
-                                    : ''
-                                }
-                                style={{
-                                  borderLeft: '1px solid #e0e0e0',
-                                  borderRight: '1px solid #e0e0e0',
-                                  padding: '1px',
-                                  minWidth: '70px',
-                                  width: '70px',
-                                  maxWidth: '70px',
-                                }}
-                              >
-                                {dataSeriesMachine && dataSeriesMachine.length > 0
-                                  ? `${dataSeriesMachine[0].efficiency?.toFixed(2)}%`
-                                  : '-'}
-                              </TableCell>
-                            </>
-                          );
-                        })}
-                    </TableRow>
-                  );
-                })}
+                            return (
+                              <>
+                                <TableCell
+                                  align="center"
+                                  style={{
+                                    borderLeft: '1px solid #e0e0e0',
+                                    padding: '1px',
+                                    minWidth: '72px',
+                                    width: '72px',
+                                    maxWidth: '72px',
+                                  }}
+                                >
+                                  {dataSeriesMachine && dataSeriesMachine.length > 0 ? dataSeriesMachine[0].connected : '-'}
+                                </TableCell>
+                                <TableCell
+                                  align="center"
+                                  style={{
+                                    borderLeft: '1px solid #e0e0e0',
+                                    padding: '1px',
+                                    minWidth: '68px',
+                                    width: '68px',
+                                    maxWidth: '68px',
+                                  }}
+                                >
+                                  {dataSeriesMachine && dataSeriesMachine.length > 0 ? dataSeriesMachine[0].operating : '-'}
+                                </TableCell>
+                                <TableCell
+                                  align="center"
+                                  className={
+                                    dataSeriesMachine.length > 0 && dataSeriesMachine[0].efficiency_style !== ''
+                                      ? dataSeriesMachine[0].efficiency_style
+                                      : ''
+                                  }
+                                  style={{
+                                    borderLeft: '1px solid #e0e0e0',
+                                    borderRight: '1px solid #e0e0e0',
+                                    padding: '1px',
+                                    minWidth: '70px',
+                                    width: '70px',
+                                    maxWidth: '70px',
+                                  }}
+                                >
+                                  {dataSeriesMachine && dataSeriesMachine.length > 0
+                                    ? `${dataSeriesMachine[0].efficiency?.toFixed(2)}%`
+                                    : '-'}
+                                </TableCell>
+                              </>
+                            );
+                          })}
+                      </TableRow>
+                    );
+                  },
+                )}
               </TableBody>
             </Table>
           </TableContainer>

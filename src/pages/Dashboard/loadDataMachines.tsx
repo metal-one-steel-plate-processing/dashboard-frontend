@@ -39,7 +39,7 @@ interface MachineInterface {
   description: string;
   group: string;
   factory: string;
-  sequenceMachine: string;
+  sequenceMachine: number;
   file_url: string;
 }
 
@@ -117,7 +117,7 @@ const LoadDataMachines: React.FC<PropsPage> = props => {
                 if (machineSelected.length > 0) {
                   newMachines.push({
                     ...eachMachineSettings,
-                    sequenceMachine: hasMachine[0].option2,
+                    sequenceMachine: parseInt(hasMachine[0].option2 || 9999, 10),
                   });
                 }
               } else if (GroupsSelected.length > 0) {
@@ -126,13 +126,13 @@ const LoadDataMachines: React.FC<PropsPage> = props => {
                     if (FactoriesSelected.indexOf(eachMachineSettings.factory) >= 0) {
                       newMachines.push({
                         ...eachMachineSettings,
-                        sequenceMachine: hasMachine[0].option2,
+                        sequenceMachine: parseInt(hasMachine[0].option2 || 9999, 10),
                       });
                     }
                   } else {
                     newMachines.push({
                       ...eachMachineSettings,
-                      sequenceMachine: hasMachine[0].option2,
+                      sequenceMachine: parseInt(hasMachine[0].option2 || 9999, 10),
                     });
                   }
                 }
@@ -140,13 +140,13 @@ const LoadDataMachines: React.FC<PropsPage> = props => {
                 if (FactoriesSelected.indexOf(eachMachineSettings.factory) >= 0) {
                   newMachines.push({
                     ...eachMachineSettings,
-                    sequenceMachine: hasMachine[0].option2,
+                    sequenceMachine: parseInt(hasMachine[0].option2 || 9999, 10),
                   });
                 }
               } else {
                 newMachines.push({
                   ...eachMachineSettings,
-                  sequenceMachine: hasMachine[0].option2,
+                  sequenceMachine: parseInt(hasMachine[0].option2 || 9999, 10),
                 });
               }
             }

@@ -91,7 +91,7 @@ interface MachineInterface {
   group: string;
   subgroup: string;
   factory: string;
-  sequenceMachine: string;
+  sequenceMachine: number;
   colorSubgroup?: string;
   file_url?: string;
 }
@@ -266,7 +266,7 @@ const LoadDataMachinesReport: React.FC = () => {
               } else {
                 newMachines.push({
                   ...eachMachineSettings,
-                  sequenceMachine: hasMachine[0].option2,
+                  sequenceMachine: parseInt(hasMachine[0].option2 || 9999, 10),
                   colorSubgroup: dataMachineSubgroup[0] ? dataMachineSubgroup[0].high_color : '',
                 });
               }
@@ -438,36 +438,33 @@ const LoadDataMachinesReport: React.FC = () => {
 
   function loadSeriesAverage() {
     const newSeriesAverage: SeriesAverageInterface[] = [];
-    AllMachines.sort((eachMachine, eachMachine2) => {
-      if (eachMachine.sequenceMachine && eachMachine2.sequenceMachine) {
-        return parseFloat(eachMachine.sequenceMachine) > parseFloat(eachMachine2.sequenceMachine) ? 1 : -1;
-      }
-      return 0;
-    }).map(eachMachine => {
-      const totalDays = eachDay?.length || 0;
-      let operatingMachine = 0;
-      let connectedMachine = 0;
-      let efficiencyMachine = 0;
+    AllMachines.sort((eachMachine, eachMachine2) => (eachMachine.sequenceMachine > eachMachine2.sequenceMachine ? 1 : -1)).map(
+      eachMachine => {
+        const totalDays = eachDay?.length || 0;
+        let operatingMachine = 0;
+        let connectedMachine = 0;
+        let efficiencyMachine = 0;
 
-      series
-        .filter(eachSeries => eachSeries.machineId === eachMachine.id)
-        .map(eachSeries => {
-          operatingMachine += eachSeries.operating ? eachSeries.operating : 0;
-          connectedMachine += eachSeries.connected ? eachSeries.connected : 0;
-          efficiencyMachine += eachSeries.efficiency ? eachSeries.efficiency : 0;
-          return true;
+        series
+          .filter(eachSeries => eachSeries.machineId === eachMachine.id)
+          .map(eachSeries => {
+            operatingMachine += eachSeries.operating ? eachSeries.operating : 0;
+            connectedMachine += eachSeries.connected ? eachSeries.connected : 0;
+            efficiencyMachine += eachSeries.efficiency ? eachSeries.efficiency : 0;
+            return true;
+          });
+
+        newSeriesAverage.push({
+          machineId: eachMachine.id,
+          operating: (operatingMachine / totalDays).toFixed(0),
+          connected: (connectedMachine / totalDays).toFixed(0),
+          efficiency: (efficiencyMachine / totalDays).toFixed(2),
+          subgroupMachine: eachMachine.subgroup,
+          colorSubgroupMachine: eachMachine.colorSubgroup,
         });
-
-      newSeriesAverage.push({
-        machineId: eachMachine.id,
-        operating: (operatingMachine / totalDays).toFixed(0),
-        connected: (connectedMachine / totalDays).toFixed(0),
-        efficiency: (efficiencyMachine / totalDays).toFixed(2),
-        subgroupMachine: eachMachine.subgroup,
-        colorSubgroupMachine: eachMachine.colorSubgroup,
-      });
-      return true;
-    });
+        return true;
+      },
+    );
     newSeriesAverage && newSeriesAverage.length > 0 ? setSeriesAverage(newSeriesAverage) : setSeriesAverage([]);
   }
 
@@ -780,12 +777,7 @@ const LoadDataMachinesReport: React.FC = () => {
                   </TableCell>
                   <TableCell style={{ padding: 0, border: 0 }}>
                     {AllMachines.filter(eachMachine => eachSubgroupSeriesAverage.machines.indexOf(eachMachine.id) > 0)
-                      .sort((eachMachine, eachMachine2) => {
-                        if (eachMachine.sequenceMachine && eachMachine2.sequenceMachine) {
-                          return parseFloat(eachMachine.sequenceMachine) > parseFloat(eachMachine2.sequenceMachine) ? 1 : -1;
-                        }
-                        return 0;
-                      })
+                      .sort((eachMachine, eachMachine2) => (eachMachine.sequenceMachine > eachMachine2.sequenceMachine ? 1 : -1))
                       .map(eachMachine => {
                         const dataSeriesAverage = seriesAverage.filter(eachSeriesAverage => eachSeriesAverage.machineId === eachMachine.id);
                         return (

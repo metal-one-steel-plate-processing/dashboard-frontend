@@ -49,7 +49,7 @@ interface SeriesTableInterface {
   operating?: number;
   connected?: number;
   deals: DealsMachineInterface[] | null;
-  sequenceMachine?: number;
+  sequenceMachine: number;
   url: string;
 }
 
@@ -73,7 +73,7 @@ interface MachineInterface {
   description: string;
   group: string;
   factory: string;
-  sequenceMachine?: string;
+  sequenceMachine: number;
   file_url: string;
 }
 
@@ -350,7 +350,7 @@ const GraphicDashboard: React.FC<PropsPage> = props => {
           newSeriesTable.push({
             name: eachMachine.description,
             factory: eachMachine.factory,
-            sequenceMachine: parseFloat(eachMachine.sequenceMachine ? eachMachine.sequenceMachine : '0'),
+            sequenceMachine: eachMachine.sequenceMachine,
             operating,
             connected,
             deals: statusObject || null,
@@ -361,7 +361,7 @@ const GraphicDashboard: React.FC<PropsPage> = props => {
             {
               name: eachMachine.description,
               factory: eachMachine.factory,
-              sequenceMachine: parseFloat(eachMachine.sequenceMachine ? eachMachine.sequenceMachine : '0'),
+              sequenceMachine: eachMachine.sequenceMachine,
               operating,
               connected,
               deals: statusObject || null,
@@ -608,12 +608,7 @@ const GraphicDashboard: React.FC<PropsPage> = props => {
           </TableHead>
           <TableBody>
             {SeriesTable &&
-              SeriesTable.sort((eachSeries, eachSeries2) => {
-                if (eachSeries.sequenceMachine && eachSeries2.sequenceMachine) {
-                  return eachSeries.sequenceMachine > eachSeries2.sequenceMachine ? 1 : -1;
-                }
-                return 0;
-              }).map((eachSeries: SeriesTableInterface, index: number) => (
+              SeriesTable.sort((eachSeries, eachSeries2) => eachSeries.sequenceMachine > eachSeries2.sequenceMachine ? 1 : -1).map((eachSeries: SeriesTableInterface, index: number) => (
                 <TableRow key={index.toString()} style={{ padding: '0px !important' }}>
                   <TableCell>
                     <div className={classes.machineDescription}>

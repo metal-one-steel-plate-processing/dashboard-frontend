@@ -32,7 +32,7 @@ interface MachineInterface {
   average_efficiency: number;
   high_efficiency: number;
   factory: string;
-  sequenceMachine: string;
+  sequenceMachine: number;
   file_url: string;
 }
 
@@ -79,7 +79,7 @@ const MachineList: React.FC = () => {
     setLoading(true);
 
     try {
-      const responseSettings = await api.get('/user-settings');
+      const responseSettings = await api.get(`/user-settings/${user.id}`);
 
       const responseMachine = await api.get('/machine-settings');
       if (responseMachine.data && responseMachine.data.length > 0) {
@@ -89,20 +89,18 @@ const MachineList: React.FC = () => {
           responseMachine.data.map((eachMachine: MachineInterface) => {
             const hasMachine = responseSettings.data.filter(
               (eachSettingsUsers: UserSettingsInterface) =>
-                eachSettingsUsers.user_name === user.name &&
-                eachSettingsUsers.canceled === 'N' &&
-                eachSettingsUsers.description === eachMachine.name &&
-                eachSettingsUsers.option1 === 'allow',
+                eachSettingsUsers.description === eachMachine.name && eachSettingsUsers.option1 === 'allow',
             );
             if (hasMachine.length > 0) {
               newMachineSettings.push({
                 ...eachMachine,
-                sequenceMachine: hasMachine[0].option2,
+                sequenceMachine: parseInt(hasMachine[0].option2 || 9999, 10),
               });
             }
 
             return true;
           });
+          console.log(newMachineSettings);
           setAllMachines(newMachineSettings);
         }
       }
@@ -141,39 +139,36 @@ const MachineList: React.FC = () => {
           </TableHead>
           <TableBody>
             {AllMachines &&
-              AllMachines.sort((eachMachine, eachMachine2) => {
-                if (eachMachine.sequenceMachine && eachMachine2.sequenceMachine) {
-                  return parseFloat(eachMachine.sequenceMachine) > parseFloat(eachMachine2.sequenceMachine) ? 1 : -1;
-                }
-                return 0;
-              }).map(eachMachine => (
-                <TableRow hover key={eachMachine.id}>
-                  <TableCell>
-                    <IconButton color="secondary" size="small" onClick={() => handleEditMachine(eachMachine.id)}>
-                      <ForwardIcon />
-                    </IconButton>
-                  </TableCell>
-                  <TableCell>
-                    <Box display="flex" alignItems="center">
-                      <Box display="flex">
-                        <Avatar variant="rounded" alt={eachMachine.name} src={eachMachine.file_url}>
-                          <BrokenImageIcon />
-                        </Avatar>
+              AllMachines.sort((eachMachine, eachMachine2) => (eachMachine.sequenceMachine > eachMachine2.sequenceMachine ? 1 : -1)).map(
+                eachMachine => (
+                  <TableRow hover key={eachMachine.id}>
+                    <TableCell>
+                      <IconButton color="secondary" size="small" onClick={() => handleEditMachine(eachMachine.id)}>
+                        <ForwardIcon />
+                      </IconButton>
+                    </TableCell>
+                    <TableCell>
+                      <Box display="flex" alignItems="center">
+                        <Box display="flex">
+                          <Avatar variant="rounded" alt={eachMachine.name} src={eachMachine.file_url}>
+                            <BrokenImageIcon />
+                          </Avatar>
+                        </Box>
+                        <Box display="flex" ml={1}>
+                          {eachMachine.description}
+                        </Box>
                       </Box>
-                      <Box display="flex" ml={1}>
-                        {eachMachine.description}
-                      </Box>
-                    </Box>
-                  </TableCell>
-                  <TableCell>{eachMachine.description}</TableCell>
-                  <TableCell>{eachMachine.group}</TableCell>
-                  <TableCell>{eachMachine.subgroup}</TableCell>
-                  <TableCell>{eachMachine.low_efficiency}</TableCell>
-                  <TableCell>{eachMachine.average_efficiency}</TableCell>
-                  <TableCell>{eachMachine.high_efficiency}</TableCell>
-                  <TableCell>{eachMachine.factory}</TableCell>
-                </TableRow>
-              ))}
+                    </TableCell>
+                    <TableCell>{eachMachine.description}</TableCell>
+                    <TableCell>{eachMachine.group}</TableCell>
+                    <TableCell>{eachMachine.subgroup}</TableCell>
+                    <TableCell>{eachMachine.low_efficiency}</TableCell>
+                    <TableCell>{eachMachine.average_efficiency}</TableCell>
+                    <TableCell>{eachMachine.high_efficiency}</TableCell>
+                    <TableCell>{eachMachine.factory}</TableCell>
+                  </TableRow>
+                ),
+              )}
           </TableBody>
         </Table>
       </TableContainer>

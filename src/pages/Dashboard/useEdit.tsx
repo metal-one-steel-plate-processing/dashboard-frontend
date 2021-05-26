@@ -141,6 +141,11 @@ const UserEdit: React.ForwardRefRenderFunction<DialogHandles, PropsPage> = (prop
         description: 'Timezone MOSB',
         values: timeZones,
       },
+      {
+        name: 'csvSeparator',
+        description: 'CSV Separator',
+        values: [';', ','],
+      },
     ];
     const responseMachine = await api.get('/machine-settings');
     if (responseMachine.data && responseMachine.data.length > 0) {
