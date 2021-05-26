@@ -141,7 +141,7 @@ const SignIn: React.FC = () => {
               }}
             >
               <Typography style={{ color: '#FFF' }} component="h1" variant="h5">
-                Account Login - TESTE
+                Account Login
               </Typography>
               <Form ref={formRef} className={classes.form} onSubmit={handleSubmit}>
                 <ValidationTextField
