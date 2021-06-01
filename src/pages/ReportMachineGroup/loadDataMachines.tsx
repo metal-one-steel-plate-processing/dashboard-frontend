@@ -135,14 +135,14 @@ const LoadDataMachinesReport: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [AllMachines, setAllMachines] = useState<MachineInterface[]>([]);
   const [DataMachine, setDataMachine] = useState<DataMachineInterface[]>([]);
-  const dateNow = new Date();
-  const monthNow = dateNow.getMonth();
-  const yearNow = dateNow.getFullYear();
   const { user, FactoriesSelected, GroupsSelected, MachinesSelected } = useAuth();
   const [dateRange, setDateRange] = React.useState<DateRange>({
-    startDate: new Date(yearNow, monthNow, startOfWeek(new Date()).getDate()),
-    endDate: new Date(yearNow, monthNow, endOfWeek(new Date()).getDate()),
+    startDate: new Date(startOfWeek(new Date()).getFullYear(), startOfWeek(new Date()).getMonth(), startOfWeek(new Date()).getDate()),
+    endDate: new Date(endOfWeek(new Date()).getFullYear(), endOfWeek(new Date()).getMonth(), endOfWeek(new Date()).getDate()),
   });
+
+  console.log(dateRange.startDate);
+  console.log(dateRange.endDate);
   const eachDay =
     dateRange.startDate &&
     dateRange.endDate &&
@@ -561,8 +561,12 @@ const LoadDataMachinesReport: React.FC = () => {
               open={open}
               toggle={toggle}
               initialDateRange={{
-                startDate: new Date(yearNow, monthNow, startOfWeek(new Date()).getDate()),
-                endDate: new Date(yearNow, monthNow, endOfWeek(new Date()).getDate()),
+                startDate: new Date(
+                  startOfWeek(new Date()).getFullYear(),
+                  startOfWeek(new Date()).getMonth(),
+                  startOfWeek(new Date()).getDate(),
+                ),
+                endDate: new Date(endOfWeek(new Date()).getFullYear(), endOfWeek(new Date()).getMonth(), endOfWeek(new Date()).getDate()),
               }}
               onChange={range => setDateRange(range)}
             />
