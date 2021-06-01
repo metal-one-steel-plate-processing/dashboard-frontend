@@ -141,8 +141,6 @@ const LoadDataMachinesReport: React.FC = () => {
     endDate: new Date(endOfWeek(new Date()).getFullYear(), endOfWeek(new Date()).getMonth(), endOfWeek(new Date()).getDate()),
   });
 
-  console.log(dateRange.startDate);
-  console.log(dateRange.endDate);
   const eachDay =
     dateRange.startDate &&
     dateRange.endDate &&
