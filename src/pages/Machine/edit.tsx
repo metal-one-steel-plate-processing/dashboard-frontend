@@ -1,3 +1,4 @@
+/* eslint-disable prettier/prettier */
 /* eslint-disable no-unused-expressions */
 /* eslint-disable no-await-in-loop */
 /* eslint-disable import/no-extraneous-dependencies */
@@ -17,11 +18,14 @@ import CardActionArea from '@material-ui/core/CardActionArea';
 import CardMedia from '@material-ui/core/CardMedia';
 import Box from '@material-ui/core/Box';
 import InputAdornment from '@material-ui/core/InputAdornment';
+import { Typography } from '@material-ui/core';
+import ButtonBase from '@material-ui/core/ButtonBase';
 
 import { toast } from 'react-toastify';
 import { GithubPicker, ColorResult } from 'react-color';
 import 'react-color-palette/lib/css/styles.css';
 
+import EditStandarTable,{ DialogHandlesStandardTableEdit } from './editStandardTable';
 import BackdropComponent from '../../components/BackdropComponent';
 import api from '../../services/api';
 import { useAuth } from '../../hooks/AuthContext';
@@ -65,7 +69,7 @@ function ComponenteImage(props: PropsComponenteImage) {
           id="contained-button-file-card"
           onChange={e => e.target.files && handleSubmitImg(e.target.files[0])}
         />
-        <Button size="small" disabled={!!img} color="secondary" onClick={() => handleSubmitImgRemove()}>
+        <Button size="small" disabled={!img} color="secondary" onClick={() => handleSubmitImgRemove()}>
           Remove
         </Button>
         <label htmlFor="contained-button-file-card">
@@ -83,16 +87,19 @@ const MachineEdit: React.ForwardRefRenderFunction<DialogHandles, InterfaceProps>
   const [OpenMachineEdit, setOpenMachineEdit] = useState(false);
   const formRefEditMachine = useRef<HTMLFormElement>(null);
   const inputRefIdEditMachine = useRef<HTMLInputElement>(null);
+  const EditStandardTableRef = useRef<DialogHandlesStandardTableEdit>(null);
   const [AllGroups, setAllGroups] = useState<string[]>([]);
   const [AllSubgroups, setAllSubgroups] = useState<string[]>([]);
   const [GroupSelected, setGroupSelected] = useState('');
   const [SubgroupSelected, setSubgroupSelected] = useState('');
   const [AllFactories, setAllFactories] = useState<string[]>([]);
   const [FactorySelected, setFactorySelected] = useState('');
-  const [ColorPickerLow, setColorPickerLow] = useState('#ffffff');
-  const [ColorPickerAverage, setColorPickerAverage] = useState('#ffffff');
-  const [ColorPickerHigh, setColorPickerHigh] = useState('#ffffff');
+  const [ColorPickerLow, setColorPickerLow] = useState('#DB3E00');
+  const [ColorPickerAverage, setColorPickerAverage] = useState('#FCCB00');
+  const [ColorPickerHigh, setColorPickerHigh] = useState('#008B02');
   const [MachineImg, setMachineImg] = useState('');
+  const [MachineStandardTable, setMachineStandardTable] = useState('');
+  const [MachineId, setMachineId] = useState('');
   const { user } = useAuth();
   const MyTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
   const colorsPiker = [
@@ -160,10 +167,18 @@ const MachineEdit: React.ForwardRefRenderFunction<DialogHandles, InterfaceProps>
         (document.querySelector("[name='model']") as HTMLInputElement).value = dataMachine.model;
         (document.querySelector("[name='table_length']") as HTMLInputElement).value = dataMachine.table_length;
         (document.querySelector("[name='table_width']") as HTMLInputElement).value = dataMachine.table_width;
-        (document.querySelector("[name='auto_feeding']") as HTMLInputElement).value = dataMachine.auto_feeding;
-        (document.querySelector("[name='capacity']") as HTMLInputElement).value = dataMachine.capacity;
-        (document.querySelector("[name='speed']") as HTMLInputElement).value = dataMachine.speed;
         (document.querySelector("[name='memo']") as HTMLInputElement).value = dataMachine.memo;
+        (document.querySelector("[name='manufacturer']") as HTMLInputElement).value = dataMachine.manufacturer;
+        (document.querySelector("[name='power']") as HTMLInputElement).value = dataMachine.power;
+        (document.querySelector("[name='power_source_model']") as HTMLInputElement).value = dataMachine.power_source_model;
+        (document.querySelector("[name='power_source_manufacturer']") as HTMLInputElement).value = dataMachine.power_source_manufacturer;
+        (document.querySelector("[name='manufacturer_torch']") as HTMLInputElement).value = dataMachine.manufacturer_torch;
+        (document.querySelector("[name='torch_quantity']") as HTMLInputElement).value = dataMachine.torch_quantity;
+        (document.querySelector("[name='type_laser']") as HTMLInputElement).value = dataMachine.type_laser;
+        (document.querySelector("[name='usage_tickness']") as HTMLInputElement).value = dataMachine.usage_tickness;
+        (document.querySelector("[name='min_tickness']") as HTMLInputElement).value = dataMachine.min_tickness;
+        (document.querySelector("[name='max_tickness']") as HTMLInputElement).value = dataMachine.max_tickness;
+        (document.querySelector("[name='grill_lifecycle']") as HTMLInputElement).value = dataMachine.grill_lifecycle;
       } catch (error) {
         toast.error(`Error setFormdata : ${error.message}`);
       }
@@ -172,9 +187,11 @@ const MachineEdit: React.ForwardRefRenderFunction<DialogHandles, InterfaceProps>
       setGroupSelected(dataMachine.group);
       setSubgroupSelected(dataMachine.subgroup);
       setFactorySelected(dataMachine.factory);
-      dataMachine.low_color && setColorPickerLow(dataMachine.low_color);
+      setMachineId(id);
+      setMachineStandardTable(dataMachine.standard_table_file_url);
+      /* dataMachine.low_color && setColorPickerLow(dataMachine.low_color);
       dataMachine.average_color && setColorPickerAverage(dataMachine.average_color);
-      dataMachine.high_color && setColorPickerHigh(dataMachine.high_color);
+      dataMachine.high_color && setColorPickerHigh(dataMachine.high_color); */
       dataMachine.file_url && setMachineImg(dataMachine.file_url);
     } catch (error) {
       toast.error(error);
@@ -192,6 +209,10 @@ const MachineEdit: React.ForwardRefRenderFunction<DialogHandles, InterfaceProps>
   const handleClose = () => {
     setOpenMachineEdit(false);
   };
+
+  const handleEditStandardTable = () => {
+    EditStandardTableRef.current?.standarTableEdit(MachineId);
+  }
 
   async function handleSubmit() {
     try {
@@ -311,6 +332,7 @@ const MachineEdit: React.ForwardRefRenderFunction<DialogHandles, InterfaceProps>
 
   return (
     <>
+      <EditStandarTable ref={EditStandardTableRef} MachineStandardTable={MachineStandardTable} />
       <Dialog fullWidth maxWidth="lg" open={OpenMachineEdit}>
         <DialogTitle>Machine Edit</DialogTitle>
         <DialogContent>
@@ -352,13 +374,7 @@ const MachineEdit: React.ForwardRefRenderFunction<DialogHandles, InterfaceProps>
                   <Grid item xs={12} lg={6}>
                     <TextField fullWidth InputLabelProps={{ shrink: true }} label="Description" name="machineDescription" />
                   </Grid>
-                  <Grid item xs={12} sm={4} lg={3}>
-                    <TextField fullWidth InputLabelProps={{ shrink: true }} label="Brand" name="brand" />
-                  </Grid>
-                  <Grid item xs={12} sm={4} lg={3}>
-                    <TextField fullWidth InputLabelProps={{ shrink: true }} label="Model" name="model" />
-                  </Grid>
-                  <Grid item xs={12} sm={4} lg={3}>
+                  <Grid item xs={12} sm={6} lg={3}>
                     <Autocomplete
                       options={AllGroups}
                       value={GroupSelected}
@@ -374,7 +390,7 @@ const MachineEdit: React.ForwardRefRenderFunction<DialogHandles, InterfaceProps>
                       )}
                     />
                   </Grid>
-                  <Grid item xs={12} sm={4} lg={3}>
+                  <Grid item xs={12} sm={6} lg={3}>
                     <Autocomplete
                       options={AllSubgroups}
                       value={SubgroupSelected}
@@ -390,7 +406,36 @@ const MachineEdit: React.ForwardRefRenderFunction<DialogHandles, InterfaceProps>
                       )}
                     />
                   </Grid>
-                  <Grid item xs={12} sm={4}>
+                  <Grid item xs={12} sm={6} lg={3}>
+                    <TextField fullWidth InputLabelProps={{ shrink: true }} label="Brand" name="brand" />
+                  </Grid>
+                  <Grid item xs={12} sm={6} lg={3}>
+                    <TextField fullWidth InputLabelProps={{ shrink: true }} label="Model" name="model" />
+                  </Grid>
+                  <Grid item xs={12} sm={6}>
+                    <TextField
+                      fullWidth
+                      InputLabelProps={{ shrink: true }}
+                      label="Power source Manufacturer"
+                      name="power_source_manufacturer"
+                    />
+                  </Grid>
+                  <Grid item xs={12} sm={6}>
+                    <TextField fullWidth InputLabelProps={{ shrink: true }} label="Power source Model" name="power_source_model" />
+                  </Grid>
+                  <Grid item xs={12} sm={3}>
+                    <TextField fullWidth InputLabelProps={{ shrink: true }} label="Manufacturer" name="manufacturer" />
+                  </Grid>
+                  <Grid item xs={12} sm={3}>
+                    <TextField fullWidth InputLabelProps={{ shrink: true }} label="Manufacturer torch" name="manufacturer_torch" />
+                  </Grid>
+                  <Grid item xs={12} sm={3}>
+                    <TextField fullWidth InputLabelProps={{ shrink: true }} type="number" label="Torch quantity" name="torch_quantity" />
+                  </Grid>
+                  <Grid item xs={12} sm={3}>
+                    <TextField fullWidth InputLabelProps={{ shrink: true }} label="Type of Laser" name="type_laser" />
+                  </Grid>
+                  <Grid item xs={12} sm={4} lg={2}>
                     <TextField
                       fullWidth
                       InputLabelProps={{ shrink: true }}
@@ -400,10 +445,9 @@ const MachineEdit: React.ForwardRefRenderFunction<DialogHandles, InterfaceProps>
                       InputProps={{
                         endAdornment: <InputAdornment position="end">mm</InputAdornment>,
                       }}
-                      helperText="In millimeters"
                     />
                   </Grid>
-                  <Grid item xs={12} sm={4}>
+                  <Grid item xs={12} sm={4} lg={2}>
                     <TextField
                       fullWidth
                       InputLabelProps={{ shrink: true }}
@@ -413,19 +457,56 @@ const MachineEdit: React.ForwardRefRenderFunction<DialogHandles, InterfaceProps>
                       InputProps={{
                         endAdornment: <InputAdornment position="end">mm</InputAdornment>,
                       }}
-                      helperText="In millimeters"
                     />
                   </Grid>
                   <Grid item xs={12} sm={4} lg={2}>
-                    <TextField fullWidth InputLabelProps={{ shrink: true }} label="Auto feeding" name="auto_feeding" />
+                    <Box bgcolor="text.disabled" color="background.paper" p={1.8} style={{ width: '100%'}} component={ButtonBase} onClick={()=> handleEditStandardTable()}><Typography variant="caption">Standard Table</Typography></Box>
+
+                    {/* <Button fullWidth variant="contained" size="small"></Button> */}
                   </Grid>
                   <Grid item xs={12} sm={4} lg={2}>
-                    <TextField fullWidth InputLabelProps={{ shrink: true }} label="Capacity" name="capacity" />
+                    <TextField
+                      fullWidth
+                      InputLabelProps={{ shrink: true }}
+                      label="Mín. Thickness"
+                      type="number"
+                      name="min_tickness"
+                      InputProps={{
+                        endAdornment: <InputAdornment position="end">mm</InputAdornment>,
+                      }}
+                    />
                   </Grid>
                   <Grid item xs={12} sm={4} lg={2}>
-                    <TextField fullWidth InputLabelProps={{ shrink: true }} label="Speed" name="speed" />
+                    <TextField
+                      fullWidth
+                      InputLabelProps={{ shrink: true }}
+                      label="Máx. Tickness"
+                      name="max_tickness"
+                      type="number"
+                      InputProps={{
+                        endAdornment: <InputAdornment position="end">mm</InputAdornment>,
+                      }}
+                    />
                   </Grid>
-                  <Grid item xs={12} lg={10}>
+                  <Grid item xs={12} sm={4} lg={2}>
+                    <TextField
+                      fullWidth
+                      InputLabelProps={{ shrink: true }}
+                      label="Usage Tickness"
+                      name="usage_tickness"
+                      type="number"
+                      InputProps={{
+                        endAdornment: <InputAdornment position="end">mm</InputAdornment>,
+                      }}
+                    />
+                  </Grid>
+                  <Grid item xs={12} sm={3} lg={2}>
+                    <TextField fullWidth InputLabelProps={{ shrink: true }} label="Power" name="power" />
+                  </Grid>
+                  <Grid item xs={12} sm={3} lg={2}>
+                    <TextField fullWidth InputLabelProps={{ shrink: true }} label="Grill Lifecycle" name="grill_lifecycle" />
+                  </Grid>
+                  <Grid item xs={12} sm={6} lg={8}>
                     <TextField fullWidth InputLabelProps={{ shrink: true }} label="Memo" name="memo" />
                   </Grid>
                   <Grid item xs={12} sm={4} lg>
@@ -437,7 +518,7 @@ const MachineEdit: React.ForwardRefRenderFunction<DialogHandles, InterfaceProps>
                       type="number"
                     />
                     {ColorPickerLow !== '#ffffff' && <Box style={{ backgroundColor: ColorPickerLow, height: '20px' }} />}
-                    <Box mt={1} style={{ maxWidth: '237px' }}>
+                    <Box mt={1} style={{ maxWidth: '237px' }} display="none">
                       <GithubPicker colors={colorsPiker} width="100%" color={ColorPickerLow} onChange={handleChangeColorLow} />
                     </Box>
                   </Grid>
@@ -450,7 +531,7 @@ const MachineEdit: React.ForwardRefRenderFunction<DialogHandles, InterfaceProps>
                       type="number"
                     />
                     {ColorPickerAverage !== '#ffffff' && <Box style={{ backgroundColor: ColorPickerAverage, height: '20px' }} />}
-                    <Box mt={1} style={{ maxWidth: '237px' }}>
+                    <Box mt={1} style={{ maxWidth: '237px' }} display="none">
                       <GithubPicker colors={colorsPiker} width="100%" color={ColorPickerAverage} onChange={handleChangeColorAverage} />
                     </Box>
                   </Grid>
@@ -463,7 +544,7 @@ const MachineEdit: React.ForwardRefRenderFunction<DialogHandles, InterfaceProps>
                       type="number"
                     />
                     {ColorPickerHigh !== '#ffffff' && <Box style={{ backgroundColor: ColorPickerHigh, height: '20px' }} />}
-                    <Box mt={1} style={{ maxWidth: '237px' }}>
+                    <Box mt={1} style={{ maxWidth: '237px' }} display="none">
                       <GithubPicker colors={colorsPiker} width="100%" color={ColorPickerHigh} onChange={handleChangeColorHigh} />
                     </Box>
                   </Grid>

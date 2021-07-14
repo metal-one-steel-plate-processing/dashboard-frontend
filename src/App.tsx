@@ -15,6 +15,7 @@ const App: React.FC = () => (
       </BrowserRouter>
     </AuthProvider>
     <GlobalStyle />
+
     <ToastContainer autoClose={3000} />
   </>
 );

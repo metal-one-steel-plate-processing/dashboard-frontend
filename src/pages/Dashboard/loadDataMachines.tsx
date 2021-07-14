@@ -178,7 +178,7 @@ const LoadDataMachines: React.FC<PropsPage> = props => {
   }, [AllMachines]);
 
   async function loadDataMachine() {
-    setLoading(true);
+    // setLoading(true);
     // setDataMachine(null);
     let newDataMachine: DataMachineInterface[] | undefined = [];
 
@@ -219,7 +219,7 @@ const LoadDataMachines: React.FC<PropsPage> = props => {
       toast.error(`machine data not found: ${error}`);
       setDataMachine(null);
     } finally {
-      setLoading(false);
+      // setLoading(false);
     }
 
     return true;
