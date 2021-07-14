@@ -247,7 +247,7 @@ const MachineEdit: React.ForwardRefRenderFunction<DialogHandles, InterfaceProps>
 
               if (tipoInput === 'number') {
                 // eslint-disable-next-line radix
-                data = { ...data, [nameInput]: parseInt(valueInput) };
+                data = { ...data, [nameInput]: parseFloat(valueInput) };
               }
             }
           }
