@@ -152,7 +152,6 @@ const LoadDataMachines: React.FC<PropsPage> = props => {
             }
             return true;
           });
-
           setAllMachines(newMachines);
         }
       }

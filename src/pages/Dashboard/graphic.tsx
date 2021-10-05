@@ -186,7 +186,7 @@ const GraphicDashboard: React.FC<PropsPage> = props => {
     // console.log(new Date(getTimeStart));
     // console.log(getTimeStart);
     // console.log(newTitleDate);
-    if (props.dataMachine && props.allMachines) {
+    if (props.dataMachine && props.allMachines && props.allMachines.length > 0) {
       // let machines: MachinesInterface[] | undefined;
       // eslint-disable-next-line react/prop-types
       props.allMachines.map(eachMachine => {
@@ -379,6 +379,10 @@ const GraphicDashboard: React.FC<PropsPage> = props => {
       if (newFactories) {
         setDateTimeFactories(newFactories);
       }
+    }else{
+
+        setSeriesTable(null);
+        setDateTimeFactories(null);
     }
   }, [getTimeEnd, getTimeStart, props.allMachines, props.dataMachine]);
 
