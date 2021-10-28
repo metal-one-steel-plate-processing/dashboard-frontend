@@ -106,7 +106,7 @@ const useStyles = makeStyles(theme => ({
     marginBottom: 10,
   },
   container: {
-    maxHeight: 440,
+    maxHeight: 340,
   },
   tableCellIcon: {
     maxWidth: 50,

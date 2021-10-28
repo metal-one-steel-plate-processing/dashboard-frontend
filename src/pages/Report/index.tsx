@@ -1,9 +1,10 @@
 import React, { useState, useRef } from 'react';
+import useMediaQuery from '@material-ui/core/useMediaQuery';
 import AppBar from '@material-ui/core/AppBar';
 import Grid from '@material-ui/core/Grid';
 import Toolbar from '@material-ui/core/Toolbar';
 import Typography from '@material-ui/core/Typography';
-import { makeStyles } from '@material-ui/core/styles';
+import { makeStyles, useTheme } from '@material-ui/core/styles';
 import Container from '@material-ui/core/Container';
 import Drawer from '@material-ui/core/Drawer';
 import Link from '@material-ui/core/Link';
@@ -13,6 +14,7 @@ import Avatar from '@material-ui/core/Avatar';
 import MenuIcon from '@material-ui/icons/Menu';
 import ExitToAppIcon from '@material-ui/icons/ExitToApp';
 
+import Box from '@material-ui/core/Box';
 import ModalUser, { ModalHandles } from '../Modal/UserDataDialog';
 import { useAuth } from '../../hooks/AuthContext';
 import MachineSettings from '../Dashboard/machineSettings';
@@ -59,6 +61,8 @@ const useStyles = makeStyles(theme => ({
 const Report: React.FC = () => {
   const classes = useStyles();
   const dialogRef = useRef<ModalHandles>(null);
+  const theme = useTheme();
+  const isSmall = useMediaQuery(theme.breakpoints.down('xs'));
 
   const { signOut, user } = useAuth();
 
@@ -72,26 +76,35 @@ const Report: React.FC = () => {
       <div className={classes.containerDashBoard}>
         <AppBar position="relative">
           <Toolbar style={{ justifyContent: 'space-between' }}>
-            <IconButton edge="start" className={classes.menuButton} onClick={() => setOpenDrawer(true)} color="inherit" aria-label="menu">
-              <MenuIcon />
-            </IconButton>
-            <Typography variant="h6" className={classes.title} color="inherit" noWrap>
-              MOSB
-            </Typography>
-
-            <Grid onClick={() => handleOpenModalUser(user.id)}>
-              <div className={classes.avatar}>
-                <Avatar alt={user.name} src="/static/images/avatar/1.jpg" />
-              </div>
-            </Grid>
-
-            <Typography component="h6" color="inherit">
-              Welcome,
-              {user.name}
-              <IconButton color="inherit" onClick={signOut}>
-                <ExitToAppIcon />
-              </IconButton>
-            </Typography>
+            <div style={{ width: '100%' }}>
+              <Box display="flex" flexDirection="row" alignItems="center">
+                <Box>
+                  <IconButton edge="start" onClick={() => setOpenDrawer(true)} color="inherit" size="small">
+                    <MenuIcon />
+                  </IconButton>
+                </Box>
+                <Box>
+                  <Typography variant="h6" color="inherit">
+                    MOSB
+                  </Typography>
+                </Box>
+                <Box flexGrow={1}>
+                  <Typography variant={isSmall ? 'body2' : 'body1'} color="inherit" align="right">
+                    {`Welcome, ${user.name}`}
+                  </Typography>
+                </Box>
+                <Box>
+                  <IconButton size="small" color="inherit" onClick={() => handleOpenModalUser(user.id)}>
+                    <Avatar alt={user.name} src="/static/images/avatar/1.jpg" />
+                  </IconButton>
+                </Box>
+                <Box>
+                  <IconButton size="small" color="inherit" onClick={signOut}>
+                    <ExitToAppIcon />
+                  </IconButton>
+                </Box>
+              </Box>
+            </div>
           </Toolbar>
         </AppBar>
         <Container maxWidth="xl">

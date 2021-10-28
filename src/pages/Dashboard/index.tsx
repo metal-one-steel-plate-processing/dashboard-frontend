@@ -3,7 +3,9 @@
 /* eslint-disable react/jsx-props-no-spreading */
 /* eslint-disable no-octal */
 import React, { useState, useRef } from 'react';
-import { Link as LinkRD } from 'react-router-dom';
+
+import { useTheme } from '@material-ui/core/styles';
+import useMediaQuery from '@material-ui/core/useMediaQuery';
 
 import AppBar from '@material-ui/core/AppBar';
 import Grid from '@material-ui/core/Grid';
@@ -24,10 +26,7 @@ import { convertToTimeZone } from 'date-fns-timezone/dist/convertToTimeZone';
 
 import MenuIcon from '@material-ui/icons/Menu';
 import ExitToAppIcon from '@material-ui/icons/ExitToApp';
-import TimelineIcon from '@material-ui/icons/Timeline';
-/* import TouchAppIcon from '@material-ui/icons/TouchApp'; */
-
-import Tooltip from '@material-ui/core/Tooltip';
+import Box from '@material-ui/core/Box';
 import ModalUser, { ModalHandles } from '../Modal/UserDataDialog';
 import { useAuth } from '../../hooks/AuthContext';
 import LoadDataMachines from './loadDataMachines';
@@ -45,29 +44,17 @@ function Copyright() {
 }
 
 const useStyles = makeStyles(theme => ({
-  menuButton: {
-    marginRight: theme.spacing(2),
-  },
-  title: {
-    flexGrow: 1,
-  },
   containerDashBoard: {
     minHeight: '100%',
     background: theme.palette.background.paper,
   },
   drawer: {
+    maxHeight: '70%',
     width: 'auto',
   },
   footer: {
     backgroundColor: theme.palette.background.paper,
     padding: theme.spacing(6),
-  },
-  avatar: {
-    display: 'flex',
-    '& > *': {
-      margin: theme.spacing(1),
-    },
-    cursor: 'pointer',
   },
 }));
 
@@ -84,44 +71,58 @@ const Dashboard: React.FC = () => {
   function handleOpenModalUser(id: string) {
     dialogRef.current?.openModal(id);
   }
+
+  const theme = useTheme();
+  const isSmall = useMediaQuery(theme.breakpoints.down('xs'));
+
   return (
     <>
       <div className={classes.containerDashBoard}>
         <AppBar position="relative">
-          <Toolbar style={{ justifyContent: 'space-between' }}>
-            <IconButton edge="start" className={classes.menuButton} onClick={() => setOpenDrawer(true)} color="inherit" aria-label="menu">
-              <MenuIcon />
-            </IconButton>
-            <Typography variant="h6" className={classes.title} color="inherit" noWrap>
-              MOSB
-            </Typography>
-
-            <Grid onClick={() => handleOpenModalUser(user.id)}>
-              <div className={classes.avatar}>
-                <Avatar alt={user.name} src="/static/images/avatar/1.jpg" />
-              </div>
-            </Grid>
-
-            <Typography component="h6" color="inherit">
-              Welcome,
-              {user.name}
-              <IconButton color="inherit" onClick={signOut}>
-                <ExitToAppIcon />
-              </IconButton>
-            </Typography>
+          <Toolbar>
+            <div style={{ width: '100%' }}>
+              <Box display="flex" flexDirection="row" alignItems="center">
+                <Box>
+                  <IconButton edge="start" onClick={() => setOpenDrawer(true)} color="inherit" size="small">
+                    <MenuIcon />
+                  </IconButton>
+                </Box>
+                <Box>
+                  <Typography variant="h6" color="inherit">
+                    MOSB
+                  </Typography>
+                </Box>
+                <Box flexGrow={1}>
+                  <Typography variant={isSmall ? 'body2' : 'body1'} color="inherit" align="right">
+                    {`Welcome, ${user.name}`}
+                  </Typography>
+                </Box>
+                <Box>
+                  <IconButton size="small" color="inherit" onClick={() => handleOpenModalUser(user.id)}>
+                    <Avatar alt={user.name} src="/static/images/avatar/1.jpg" />
+                  </IconButton>
+                </Box>
+                <Box>
+                  <IconButton size="small" color="inherit" onClick={signOut}>
+                    <ExitToAppIcon />
+                  </IconButton>
+                </Box>
+              </Box>
+            </div>
           </Toolbar>
         </AppBar>
         <Container maxWidth="xl">
           <Grid container justify="center">
             <Grid item xs={12}>
-              <Typography component="h1" variant="h2" align="center" color="textPrimary">
+              <Box mt={2} />
+              <Typography variant={isSmall ? 'h5' : 'h2'} align="center" color="textPrimary">
                 Machine Efficiency
               </Typography>
             </Grid>
           </Grid>
           <Grid container direction="row" justify="center" alignItems="center">
             <Grid item xs={6} sm={4} md={3} lg={2} xl={1}>
-              <Typography align="right" gutterBottom>
+              <Typography align="center" gutterBottom>
                 <MuiPickersUtilsProvider utils={DateFnsUtils} locale={enLocale}>
                   <DatePicker
                     value={convertToTimeZone(new Date(DateNow), { timeZone })}
@@ -137,15 +138,15 @@ const Dashboard: React.FC = () => {
                 </MuiPickersUtilsProvider>
               </Typography>
             </Grid>
-            <Grid item xs={3} sm={2}>
-              <Tooltip title="Report">
+            {/* <Grid item xs={3} sm={2}> */}
+            {/* <Tooltip title="Report">
                 <Typography align="left" gutterBottom component={LinkRD} to="/report">
                   <IconButton>
                     <TimelineIcon style={{ color: '#000' }} />
                   </IconButton>
                 </Typography>
-              </Tooltip>
-              {/* <Tooltip title="Appointments Operators">
+              </Tooltip> */}
+            {/* <Tooltip title="Appointments Operators">
                 <Typography
                   align="left"
                   gutterBottom
@@ -158,7 +159,7 @@ const Dashboard: React.FC = () => {
                 </Typography>
               </Tooltip> */}
 
-              {/* <Typography
+            {/* <Typography
                 component="h1"
                 variant="h4"
                 align="center"
@@ -173,7 +174,7 @@ const Dashboard: React.FC = () => {
                   onChange={e => setDateNow(e.target.value)}
                 />
               </Typography> */}
-            </Grid>
+            {/* </Grid> */}
             <Grid item xs={12}>
               <LoadDataMachines Date={DateNow} />
             </Grid>

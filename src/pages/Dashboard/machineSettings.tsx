@@ -1,14 +1,11 @@
 /* eslint-disable camelcase */
 import React, { useState, useEffect } from 'react';
 import { makeStyles } from '@material-ui/core/styles';
-import Card from '@material-ui/core/Card';
-import CardContent from '@material-ui/core/CardContent';
 import Typography from '@material-ui/core/Typography';
 import Box from '@material-ui/core/Box';
 import Autocomplete from '@material-ui/lab/Autocomplete';
 import TextField from '@material-ui/core/TextField';
 import Grid from '@material-ui/core/Grid';
-import Paper from '@material-ui/core/Paper';
 import Tabs from '@material-ui/core/Tabs';
 import Tab from '@material-ui/core/Tab';
 import Backdrop from '@material-ui/core/Backdrop';
@@ -35,7 +32,7 @@ function TabPanel(props: TabPanelProps) {
   return (
     <div role="tabpanel" hidden={value !== index} id={`simple-tabpanel-${index}`} aria-labelledby={`simple-tab-${index}`} {...other}>
       {value === index && (
-        <Box p={3}>
+        <Box p={3} style={{ maxHeight: '70%' }}>
           <Typography>{children}</Typography>
         </Box>
       )}
@@ -277,172 +274,166 @@ const MachineSettings: React.FC = () => {
         <LinearProgress className={classes.progress} color="secondary" />
         <Typography align="center">loading settings</Typography>
       </Backdrop>
-      <Paper>
-        <Tabs value={tab} onChange={handleChangeTab}>
+      <div style={{ maxHeight: '70%' }}>
+        <Tabs value={tab} onChange={handleChangeTab} variant="scrollable" scrollButtons="auto">
           <Tab label="Pages" {...a11yProps(0)} />
           <Tab label="Filters" {...a11yProps(1)} />
           <Tab label="Machines" {...a11yProps(2)} />
           <Tab label="Groups/Subgroups" {...a11yProps(3)} />
           <Tab label="Users" {...a11yProps(4)} />
         </Tabs>
-      </Paper>
-      <TabPanel value={tab} index={0}>
-        <ListReports />
-      </TabPanel>
-      <TabPanel value={tab} index={1}>
-        <Box>
-          <Card>
-            <CardContent>
-              <Grid spacing={2}>
-                <Grid item xs={12}>
-                  <Autocomplete
-                    multiple
-                    options={AllFactories}
-                    value={FactoriesSelectedAutoComplete}
-                    getOptionLabel={option => option}
-                    onChange={(event, value) => {
-                      setFilterFactories(value.map(eachValue => eachValue));
-                    }}
-                    renderInput={params => (
-                      <TextField
-                        // eslint-disable-next-line react/jsx-props-no-spreading
-                        {...params}
-                        variant="standard"
-                        label="Factories"
-                      />
-                    )}
+        <TabPanel value={tab} index={0}>
+          <ListReports />
+        </TabPanel>
+        <TabPanel value={tab} index={1}>
+          <Grid spacing={2}>
+            <Grid item xs={12}>
+              <Autocomplete
+                multiple
+                options={AllFactories}
+                value={FactoriesSelectedAutoComplete}
+                getOptionLabel={option => option}
+                onChange={(event, value) => {
+                  setFilterFactories(value.map(eachValue => eachValue));
+                }}
+                renderInput={params => (
+                  <TextField
+                    // eslint-disable-next-line react/jsx-props-no-spreading
+                    {...params}
+                    variant="standard"
+                    label="Factories"
                   />
-                  {/* <Autocomplete
-                    multiple
-                    options={AllFactories}
-                    getOptionLabel={option => option.description}
-                    onChange={(event, value) => {
-                      setFilterFactories(
-                        value.map(eachValue => eachValue.description),
-                      );
-                    }}
-                    renderInput={params => (
-                      <TextField
-                        // eslint-disable-next-line react/jsx-props-no-spreading
-                        {...params}
-                        variant="standard"
-                        label="Factories"
-                      />
-                    )}
-                  /> */}
-                </Grid>
-                <Grid item xs={12}>
-                  <Autocomplete
-                    multiple
-                    options={AllGroups}
-                    value={GroupsSelectedAutocomplete}
-                    getOptionLabel={option => option}
-                    onChange={(event, value) => {
-                      setFilterGroups(value.map(eachValue => eachValue));
-                    }}
-                    renderInput={params => (
-                      <TextField
-                        // eslint-disable-next-line react/jsx-props-no-spreading
-                        {...params}
-                        variant="standard"
-                        label="Groups"
-                      />
-                    )}
+                )}
+              />
+              {/* <Autocomplete
+                multiple
+                options={AllFactories}
+                getOptionLabel={option => option.description}
+                onChange={(event, value) => {
+                  setFilterFactories(
+                    value.map(eachValue => eachValue.description),
+                  );
+                }}
+                renderInput={params => (
+                  <TextField
+                    // eslint-disable-next-line react/jsx-props-no-spreading
+                    {...params}
+                    variant="standard"
+                    label="Factories"
                   />
-                  {/* <Autocomplete
-                    multiple
-                    options={AllGroups}
-                    value={GroupsSelected.map(eachGroupSelected => {
-                      return { description: eachGroupSelected };
-                    })}
-                    getOptionLabel={option => option.description}
-                    onChange={(event, value) => {
-                      setFilterGroups(
-                        value.map(eachValue => eachValue.description),
-                      );
-                    }}
-                    renderInput={params => (
-                      <TextField
-                        // eslint-disable-next-line react/jsx-props-no-spreading
-                        {...params}
-                        variant="standard"
-                        label="Groups"
-                      />
-                    )}
-                  /> */}
-                </Grid>
-                <Grid item xs={12}>
-                  <Autocomplete
-                    multiple
-                    options={MachinesFilters}
-                    value={MachinesSelected}
-                    onChange={(event, value) => {
-                      setFilterMachines(value);
-                    }}
-                    getOptionLabel={option =>
-                      // eslint-disable-next-line prettier/prettier
-                      `${option.description} (${option.factory} - ${option.group}) `}
-                    renderInput={params => (
-                      <TextField
-                        // eslint-disable-next-line react/jsx-props-no-spreading
-                        {...params}
-                        variant="standard"
-                        label="Machines"
-                      />
-                    )}
+                )}
+              /> */}
+            </Grid>
+            <Grid item xs={12}>
+              <Autocomplete
+                multiple
+                options={AllGroups}
+                value={GroupsSelectedAutocomplete}
+                getOptionLabel={option => option}
+                onChange={(event, value) => {
+                  setFilterGroups(value.map(eachValue => eachValue));
+                }}
+                renderInput={params => (
+                  <TextField
+                    // eslint-disable-next-line react/jsx-props-no-spreading
+                    {...params}
+                    variant="standard"
+                    label="Groups"
                   />
+                )}
+              />
+              {/* <Autocomplete
+                multiple
+                options={AllGroups}
+                value={GroupsSelected.map(eachGroupSelected => {
+                  return { description: eachGroupSelected };
+                })}
+                getOptionLabel={option => option.description}
+                onChange={(event, value) => {
+                  setFilterGroups(
+                    value.map(eachValue => eachValue.description),
+                  );
+                }}
+                renderInput={params => (
+                  <TextField
+                    // eslint-disable-next-line react/jsx-props-no-spreading
+                    {...params}
+                    variant="standard"
+                    label="Groups"
+                  />
+                )}
+              /> */}
+            </Grid>
+            <Grid item xs={12}>
+              <Autocomplete
+                multiple
+                options={MachinesFilters}
+                value={MachinesSelected}
+                onChange={(event, value) => {
+                  setFilterMachines(value);
+                }}
+                getOptionLabel={option =>
+                  // eslint-disable-next-line prettier/prettier
+                  `${option.description} (${option.factory} - ${option.group}) `}
+                renderInput={params => (
+                  <TextField
+                    // eslint-disable-next-line react/jsx-props-no-spreading
+                    {...params}
+                    variant="standard"
+                    label="Machines"
+                  />
+                )}
+              />
 
-                  {/* <Autocomplete
-                    multiple
-                    options={FactoriesSelected.map(eachFactorySelected => {
-                      return AllMachines.filter(
-                        eachMachine =>
-                          eachFactorySelected === eachMachine.factory,
-                      );
-                    })}
-                    getOptionLabel={option =>
-                      option.length > 0 && option.description
-                    }
-                    renderInput={params => (
-                      <TextField
-                        // eslint-disable-next-line react/jsx-props-no-spreading
-                        {...params}
-                        variant="standard"
-                        label="Machines"
-                      />
-                    )}
-                  /> */}
-                </Grid>
-              </Grid>
-            </CardContent>
-          </Card>
-        </Box>
-      </TabPanel>
-      {SettingsUser.map(eachSettingUser => {
-        if (eachSettingUser.description === 'userSettings' && eachSettingUser.option1 === 'allow') {
-          return (
-            <>
-              <TabPanel value={tab} index={2}>
-                <ListMachines />
+              {/* <Autocomplete
+                multiple
+                options={FactoriesSelected.map(eachFactorySelected => {
+                  return AllMachines.filter(
+                    eachMachine =>
+                      eachFactorySelected === eachMachine.factory,
+                  );
+                })}
+                getOptionLabel={option =>
+                  option.length > 0 && option.description
+                }
+                renderInput={params => (
+                  <TextField
+                    // eslint-disable-next-line react/jsx-props-no-spreading
+                    {...params}
+                    variant="standard"
+                    label="Machines"
+                  />
+                )}
+              /> */}
+            </Grid>
+          </Grid>
+        </TabPanel>
+        {SettingsUser.map(eachSettingUser => {
+          if (eachSettingUser.description === 'userSettings' && eachSettingUser.option1 === 'allow') {
+            return (
+              <>
+                <TabPanel value={tab} index={2}>
+                  <ListMachines />
+                </TabPanel>
+                <TabPanel value={tab} index={3}>
+                  <ListGroups />
+                </TabPanel>
+              </>
+            );
+          }
+          return true;
+        })}
+        {SettingsUser.map(eachSettingUser => {
+          if (eachSettingUser.description === 'userSettings' && eachSettingUser.option1 === 'allow') {
+            return (
+              <TabPanel value={tab} index={4}>
+                <UserSettings />
               </TabPanel>
-              <TabPanel value={tab} index={3}>
-                <ListGroups />
-              </TabPanel>
-            </>
-          );
-        }
-        return true;
-      })}
-      {SettingsUser.map(eachSettingUser => {
-        if (eachSettingUser.description === 'userSettings' && eachSettingUser.option1 === 'allow') {
-          return (
-            <TabPanel value={tab} index={4}>
-              <UserSettings />
-            </TabPanel>
-          );
-        }
-        return true;
-      })}
+            );
+          }
+          return true;
+        })}
+      </div>
     </>
   );
 };

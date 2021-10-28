@@ -3,7 +3,7 @@
 /* eslint-disable no-unused-expressions */
 /* eslint-disable camelcase */
 import React, { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import useMediaQuery from '@material-ui/core/useMediaQuery';
 import Grid from '@material-ui/core/Grid';
 import Typography from '@material-ui/core/Typography';
 import Chip from '@material-ui/core/Chip';
@@ -25,12 +25,11 @@ import Dialog from '@material-ui/core/Dialog';
 import DialogActions from '@material-ui/core/DialogActions';
 import DialogContent from '@material-ui/core/DialogContent';
 import ButtonBase from '@material-ui/core/ButtonBase';
-import { makeStyles } from '@material-ui/core/styles';
+import { makeStyles, useTheme } from '@material-ui/core/styles';
 import { eachDayOfInterval, format, endOfWeek, startOfWeek } from 'date-fns';
 import { convertToTimeZone } from 'date-fns-timezone/dist/convertToTimeZone';
 import { DateRangePicker, DateRange } from 'materialui-daterange-picker';
-import ArrowBackIcon from '@material-ui/icons/ArrowBack';
-import { Box, IconButton, Paper, Tooltip } from '@material-ui/core';
+import { Box, Paper, Tooltip } from '@material-ui/core';
 
 import Button from '@material-ui/core/Button';
 
@@ -147,6 +146,8 @@ const LoadDataMachinesReport: React.FC = () => {
   const [OpenViewMachineImage, setOpenViewMachineImage] = React.useState(false);
   const [MachineImage, setMachineImage] = React.useState('');
   const [CSVSeparator, setCSVSeparator] = useState(';');
+  const theme = useTheme();
+  const isSmall = useMediaQuery(theme.breakpoints.down('xs'));
 
   const handleClickOpenViewMachineImage = (machineFile: string) => {
     if (machineFile) {
@@ -409,7 +410,7 @@ const LoadDataMachinesReport: React.FC = () => {
                 return true;
               }); */
             } catch (error) {
-              throw new Error(error);
+              throw new Error(error instanceof Error ? error.message : 'Error desconhecido');
               /* console.log(error); */
             }
           }),
@@ -648,21 +649,16 @@ const LoadDataMachinesReport: React.FC = () => {
         </DialogActions>
       </Dialog>
       <Grid container spacing={2} justify="center" alignItems="center">
-        <Grid item xs={2}>
-          <Tooltip title="Return to Dashboard">
-            <Typography component={Link} to="/dashboard">
-              <IconButton>
-                <ArrowBackIcon style={{ color: '#000' }} fontSize="large" />
-              </IconButton>
-            </Typography>
-          </Tooltip>
-        </Grid>
-        <Grid item xs={7}>
+        <Grid item xs={12}>
           <Box mt={2} />
-          <Typography align="center" variant="h4">
+          <Typography align="center" variant={isSmall ? 'caption' : 'h4'}>
             {'From '}
             <Chip
-              label={<Typography variant="h5">{dateRange.startDate && format(dateRange.startDate, "MMMM d',' yyyy")}</Typography>}
+              label={
+                <Typography variant={isSmall ? 'caption' : 'h5'}>
+                  {dateRange.startDate && format(dateRange.startDate, "MMMM d',' yyyy")}
+                </Typography>
+              }
               component="a"
               variant="outlined"
               color="secondary"
@@ -670,7 +666,11 @@ const LoadDataMachinesReport: React.FC = () => {
             />
             {' To '}
             <Chip
-              label={<Typography variant="h5">{dateRange.endDate && format(dateRange.endDate, "MMMM d',' yyyy")}</Typography>}
+              label={
+                <Typography variant={isSmall ? 'caption' : 'h5'}>
+                  {dateRange.endDate && format(dateRange.endDate, "MMMM d',' yyyy")}
+                </Typography>
+              }
               component="a"
               variant="outlined"
               color="secondary"
@@ -690,19 +690,7 @@ const LoadDataMachinesReport: React.FC = () => {
             }`}
           </Typography> */}
         </Grid>
-        <Grid item xs={3}>
-          <Box display="flex" justifyContent="flex-end">
-            <Box className="low" component={Paper} p={1} mr={1}>
-              1 - 90
-            </Box>
-            <Box className="middle" component={Paper} p={1} mr={1}>
-              90 - 95
-            </Box>
-            <Box className="high" component={Paper} p={1}>
-              {'> 95'}
-            </Box>
-          </Box>
-        </Grid>
+
         <Grid item xs={12} md={9} lg={7} xl={5} style={{ zIndex: 9999 }}>
           <div style={{ position: 'absolute' }}>
             <DateRangePicker
@@ -722,7 +710,20 @@ const LoadDataMachinesReport: React.FC = () => {
         </Grid>
       </Grid>
       <Grid container spacing={2} justify="flex-end">
-        <Grid item xs={3} lg={2} style={{ flex: 'inherit' }}>
+        <Grid item xs={7}>
+          <Box display="flex" justifyContent="flex-end">
+            <Box className="low" component={Paper} p={0.5} mr={1}>
+              <Typography variant="caption">1 - 90</Typography>
+            </Box>
+            <Box className="middle" component={Paper} p={0.5} mr={1}>
+              <Typography variant="caption">90 - 95</Typography>
+            </Box>
+            <Box className="high" component={Paper} p={0.5}>
+              <Typography variant="caption">{'> 95'}</Typography>
+            </Box>
+          </Box>
+        </Grid>
+        <Grid item xs={5} lg={2} style={{ flex: 'inherit' }}>
           <CSVLink
             style={{ textDecoration: 'none' }}
             filename={`MachineEfficiency_${dateRange.startDate && format(dateRange.startDate, 'MMMM_d_yyyy')}_to_${

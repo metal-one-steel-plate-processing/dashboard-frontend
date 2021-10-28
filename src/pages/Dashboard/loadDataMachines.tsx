@@ -229,7 +229,7 @@ const LoadDataMachines: React.FC<PropsPage> = props => {
         <LinearProgress className={classes.progress} color="secondary" />
         <Typography align="center">loading machine data</Typography>
       </Backdrop>
-      <Box mt={2} />
+      <Box mt={1} />
       {DataMachine ? (
         <Graphic dataMachine={DataMachine} allMachines={AllMachines} dateMachine={props.Date} dateTimeMachine={seconds} />
       ) : (

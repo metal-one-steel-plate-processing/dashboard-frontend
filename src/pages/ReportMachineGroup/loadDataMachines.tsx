@@ -3,6 +3,7 @@
 /* eslint-disable no-unused-expressions */
 /* eslint-disable camelcase */
 import React, { useEffect, useState } from 'react';
+import useMediaQuery from '@material-ui/core/useMediaQuery';
 import Grid from '@material-ui/core/Grid';
 import Typography from '@material-ui/core/Typography';
 import Chip from '@material-ui/core/Chip';
@@ -27,7 +28,7 @@ import DialogContent from '@material-ui/core/DialogContent';
 import Button from '@material-ui/core/Button';
 import ButtonBase from '@material-ui/core/ButtonBase';
 import Tooltip from '@material-ui/core/Tooltip';
-import { makeStyles } from '@material-ui/core/styles';
+import { makeStyles, useTheme } from '@material-ui/core/styles';
 import { eachDayOfInterval, format, endOfWeek, startOfWeek } from 'date-fns';
 import { convertToTimeZone } from 'date-fns-timezone/dist/convertToTimeZone';
 import { DateRangePicker, DateRange } from 'materialui-daterange-picker';
@@ -154,6 +155,9 @@ const LoadDataMachinesReport: React.FC = () => {
   const [SubgroupSeriesAverage, setSubgroupSeriesAverage] = useState<SubgroupSeriesAverageInterface[]>([]);
   const [OpenViewMachineImage, setOpenViewMachineImage] = React.useState(false);
   const [MachineImage, setMachineImage] = React.useState('');
+
+  const theme = useTheme();
+  const isSmall = useMediaQuery(theme.breakpoints.down('xs'));
 
   const handleClickOpenViewMachineImage = (machineFile: string) => {
     if (machineFile) {
@@ -521,10 +525,14 @@ const LoadDataMachinesReport: React.FC = () => {
       <Grid container spacing={2} justify="center" alignItems="center">
         <Grid item xs={12}>
           <Box mt={2} />
-          <Typography align="center" variant="h4">
+          <Typography align="center" variant={isSmall ? 'caption' : 'h4'}>
             {'From '}
             <Chip
-              label={<Typography variant="h5">{dateRange.startDate && format(dateRange.startDate, "MMMM d',' yyyy")}</Typography>}
+              label={
+                <Typography variant={isSmall ? 'caption' : 'h5'}>
+                  {dateRange.startDate && format(dateRange.startDate, "MMMM d',' yyyy")}
+                </Typography>
+              }
               component="a"
               variant="outlined"
               color="secondary"
@@ -532,7 +540,11 @@ const LoadDataMachinesReport: React.FC = () => {
             />
             {' To '}
             <Chip
-              label={<Typography variant="h5">{dateRange.endDate && format(dateRange.endDate, "MMMM d',' yyyy")}</Typography>}
+              label={
+                <Typography variant={isSmall ? 'caption' : 'h5'}>
+                  {dateRange.endDate && format(dateRange.endDate, "MMMM d',' yyyy")}
+                </Typography>
+              }
               component="a"
               variant="outlined"
               color="secondary"
