@@ -188,22 +188,24 @@ const LoadDataMachines: React.FC<PropsPage> = props => {
             date: props.Date,
             machine: eachMachine.name,
           });
-
+          const dateTimeMachine: Date[] = [];
           responseMachine.data
             .sort((dataMachine1: DataMachineInterface, dataMachine2: DataMachineInterface) =>
               dataMachine1.datatime > dataMachine2.datatime ? 1 : -1,
             )
             // eslint-disable-next-line no-loop-func
             .map((dataMachine: DataMachineInterface) => {
-              if (newDataMachine) {
-                newDataMachine.push({
-                  ...dataMachine,
-                  machine: eachMachine.description,
-                });
-              } else {
-                newDataMachine = [{ ...dataMachine, machine: eachMachine.description }];
+              if (dateTimeMachine.indexOf(dataMachine.datatime) < 0) {
+                dateTimeMachine.push(dataMachine.datatime);
+                if (newDataMachine) {
+                  newDataMachine.push({
+                    ...dataMachine,
+                    machine: eachMachine.description,
+                  });
+                } else {
+                  newDataMachine = [{ ...dataMachine, machine: eachMachine.description }];
+                }
               }
-
               return true;
             });
         }),

@@ -300,24 +300,26 @@ const LoadDataMachinesReport: React.FC = () => {
                 endDate: dateRange.endDate && format(dateRange.endDate, 'yyyy-MM-dd'),
                 machine: eachMachine.name,
               });
-
+              const dateTimeMachine: Date[] = [];
               responseMachine.data
                 .sort((dataMachine1: DataMachineInterface, dataMachine2: DataMachineInterface) =>
                   dataMachine1.datatime > dataMachine2.datatime ? 1 : -1,
                 )
                 // eslint-disable-next-line no-loop-func
                 .map((dataMachine: DataMachineInterface) => {
-                  newDataMachine.push({
-                    ...dataMachine,
-                    datatime: convertToTimeZone(new Date(dataMachine.datatime), { timeZone }),
-                    machine: eachMachine.description,
-                  });
-
+                  if (dateTimeMachine.indexOf(dataMachine.datatime) < 0) {
+                    dateTimeMachine.push(dataMachine.datatime);
+                    newDataMachine.push({
+                      ...dataMachine,
+                      datatime: convertToTimeZone(new Date(dataMachine.datatime), { timeZone }),
+                      machine: eachMachine.description,
+                    });
+                  }
                   return true;
                 });
               return true;
             } catch (error) {
-              throw new Error(error);
+              throw new Error(error instanceof Error ? error.message : 'Error');
             }
           }),
         );
