@@ -25,6 +25,7 @@
     "date-fns": "^2.19.0",
     "date-fns-timezone": "^0.1.4",
     "date-fns-tz": "^1.0.12",
+    "dotenv": "^16.4.5",
     "file-type": "^16.3.0",
     "highcharts": "^8.2.2",
     "highcharts-react-official": "^3.0.0",
